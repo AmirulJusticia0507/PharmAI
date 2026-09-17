@@ -4,9 +4,12 @@ import { fetchDrugs, type Drug } from "@/lib/api";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+const PAGE_SIZE = 5;
+
 export default function DrugsPage() {
   const [drugs, setDrugs] = useState<Drug[]>([]);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,6 +19,7 @@ export default function DrugsPage() {
     try {
       const data = await fetchDrugs({ search: q, limit: 100 });
       setDrugs(data);
+      setPage(1);
     } catch {
       setError("Gagal mengambil data obat");
     } finally {
@@ -31,6 +35,9 @@ export default function DrugsPage() {
     e.preventDefault();
     loadDrugs(search);
   };
+
+  const totalPages = Math.ceil(drugs.length / PAGE_SIZE);
+  const visibleDrugs = drugs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <main className="drugs-shell">
@@ -49,7 +56,7 @@ export default function DrugsPage() {
         <div className="catalog-toolbar"><span><strong>{loading ? "Memuat" : drugs.length}</strong> obat ditemukan</span><span className="catalog-note"><i /> Informasi untuk referensi, bukan pengganti konsultasi medis</span></div>
 
         {error && <div className="drugs-error"><strong>Data belum dapat dimuat.</strong><span>{error}</span><button onClick={() => loadDrugs(search)}>Coba lagi</button></div>}
-        {loading ? <div className="drug-grid"><div className="drug-skeleton" /><div className="drug-skeleton" /><div className="drug-skeleton" /></div> : drugs.length === 0 ? <div className="empty-drugs"><span>⌁</span><h2>{search ? `Tidak ada obat untuk "${search}"` : "Belum ada data obat"}</h2><p>Coba kata kunci lain atau mulai dengan memindai obat.</p><a href="/scan" className="primary-action">Scan obat <span aria-hidden="true">↗</span></a></div> : <div className="drug-grid">{drugs.map((drug) => <DrugCard key={drug.id} drug={drug} />)}</div>}
+        {loading ? <div className="drug-grid"><div className="drug-skeleton" /><div className="drug-skeleton" /><div className="drug-skeleton" /></div> : drugs.length === 0 ? <div className="empty-drugs"><span>⌁</span><h2>{search ? `Tidak ada obat untuk "${search}"` : "Belum ada data obat"}</h2><p>Coba kata kunci lain atau mulai dengan memindai obat.</p><a href="/scan" className="primary-action">Scan obat <span aria-hidden="true">↗</span></a></div> : <><div className="drug-grid">{visibleDrugs.map((drug) => <DrugCard key={drug.id} drug={drug} />)}</div><nav className="drug-pagination" aria-label="Navigasi halaman obat"><button type="button" onClick={() => setPage(page - 1)} disabled={page === 1} aria-label="Halaman sebelumnya">←</button>{Array.from({ length: totalPages }, (_, index) => index + 1).map((number) => <button type="button" key={number} onClick={() => setPage(number)} className={number === page ? "active" : ""} aria-current={number === page ? "page" : undefined}>{number}</button>)}<button type="button" onClick={() => setPage(page + 1)} disabled={page === totalPages} aria-label="Halaman berikutnya">→</button></nav></>}
       </section>
     </main>
   );

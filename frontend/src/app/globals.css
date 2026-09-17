@@ -1165,6 +1165,45 @@
     gap: 14px;
 }
 
+.drug-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 32px;
+}
+
+.drug-pagination button {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: #50665b;
+    background: #f8faf6;
+    border: 1px solid #cad8cb;
+    font: 700 11px Arial, sans-serif;
+    cursor: pointer;
+}
+
+.drug-pagination button:hover:not(:disabled),
+.drug-pagination button.active {
+    color: white;
+    background: #173f34;
+    border-color: #173f34;
+}
+
+.drug-pagination button:focus-visible {
+    outline: 3px solid #88a826;
+    outline-offset: 2px;
+}
+
+.drug-pagination button:disabled {
+    color: #abb6af;
+    cursor: not-allowed;
+    opacity: .65;
+}
+
 .drug-card {
     display: block;
     position: relative;
