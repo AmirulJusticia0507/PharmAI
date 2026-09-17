@@ -380,5 +380,323 @@ def seed():
         db.close()
 
 
+# New drugs not in original seed
+NEW_DRUGS = [
+    {
+        "name": "Omeprazole 40mg",
+        "generic_name": "Omeprazole",
+        "category": "Antasida & PPI",
+        "description": "Dosis tinggi penghambat pompa proton untuk kasus maag berat.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Kimia Farma",
+    },
+    {
+        "name": "Ceftriaxxon 1g",
+        "generic_name": "Ceftriaxxon",
+        "category": "Antibiotik",
+        "description": "Antibiotik cephalosporin IV untuk infeksi bakteri paran.",
+        "dosage_form": "Kapsul",
+        "manufacturer": "Novartis",
+    },
+    {
+        "name": "Prednisone 5mg",
+        "generic_name": "Prednisone",
+        "category": "Kortikosteroid",
+        "description": "Kortikosteroid oral untuk inflammation dan alergi.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Pfizer",
+    },
+    {
+        "name": "Montelukast 10mg",
+        "generic_name": "Montelukast",
+        "category": "Bronkodilator",
+        "description": "Leukotrien receptor antagonist untuk asthma dan alergi.",
+        "dosage_form": "Tablet",
+        "manufacturer": "MSD",
+    },
+    {
+        "name": "Salmeterol 50mcg",
+        "generic_name": "Salmeterol",
+        "category": "Bronkodilator",
+        "description": "Long-acting bronchodilator untuk COPD maintenance.",
+        "dosage_form": "Inhaler",
+        "manufacturer": "GlaxoSmithKline",
+    },
+    {
+        "name": "Ipratropium 20mcg",
+        "generic_name": "Ipratropium",
+        "category": "Bronkodilator",
+        "description": "Bronchodilator untuk asthma dan COPD, sering dikombinasi dengan salmeterol.",
+        "dosage_form": "Inhaler",
+        "manufacturer": "Boehringer Ingelheim",
+    },
+    {
+        "name": "Terbutaline 2.5mg",
+        "generic_name": "Terbutaline",
+        "category": "Bronkodilator",
+        "description": "Bronchodilator worka untuk asthma acute.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Eli Lilly",
+    },
+    {
+        "name": "Amlodipine 10mg",
+        "generic_name": "Amlodipine",
+        "category": "Antihipertensi",
+        "description": "Dosis tinggi antihipertensi calcium channel blocker.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Novartis",
+    },
+    {
+        "name": "Losartan HCTZ 100/25mg",
+        "generic_name": "Losartan Potassium & Hydrochlorothiazide",
+        "category": "Antihipertensi",
+        "description": "Combination antihipertensi ARB + diuretik.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Sanofi",
+    },
+    {
+        "name": "Metformin XR 500mg",
+        "generic_name": "Metformin HCl ER",
+        "category": "Antidiabetes",
+        "description": "Extended release metformin untuk kontrol gula berkebiasaan.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Kimia Farma",
+    },
+    {
+        "name": "Glipizide 5mg",
+        "generic_name": "Glipizide",
+        "category": "Antidiabetes",
+        "description": "Sulfonylurea untuk stimulasi insulin secreti.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Sanbe Farma",
+    },
+    {
+        "name": "Insulin NPH 100 IU/ml",
+        "generic_name": "Insulin Isophane",
+        "category": "Antidiabetes",
+        "description": "Insulin kerja menengah untuk kontrol gula malam hari.",
+        "dosage_form": "Injeksi",
+        "manufacturer": "Eli Lilly",
+    },
+    {
+        "name": "Warfarin 5mg",
+        "generic_name": "Warfarin",
+        "category": "Antiklis",
+        "description": "Antiklis oral untuk prevensi stroke dan emboli.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Bayer",
+    },
+    {
+        "name": "Heparin 5000 IU",
+        "generic_name": "Heparin",
+        "category": "Antiklis",
+        "description": "Antiklis IV untuk tindakan medis segera.",
+        "dosage_form": "Injeksi",
+        "manufacturer": "Sanofi",
+    },
+    {
+        "name": "Rivaroxaban 20mg",
+        "generic_name": "Rivaroxaban",
+        "category": "Antiklis",
+        "description": "Direct oral anticoagulant (DOAC) untuk VTE prevensi.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Bayer",
+    },
+    {
+        "name": "Dabigatran 150mg",
+        "generic_name": "Dabigatran etexilate",
+        "category": "Antiklis",
+        "description": "Another DOAC untuk prevensi stroke atrial fibrillation.",
+        "dosage_form": "Kapsul",
+        "manufacturer": "Pfizer",
+    },
+    {
+        "name": "Iron Polysaccharide 30mg",
+        "generic_name": "Iron Polysaccharide",
+        "category": "Suplemen",
+        "description": "Zat besi yang bisa diabsorpsi dengan lebih baik.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Vitamin D3 1000 IU",
+        "generic_name": "Colecalciferol",
+        "category": "Suplemen",
+        "description": "Suplemen vitamin D untuk kekurangan serum vitamin D.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Youvit",
+    },
+    {
+        "name": "Calcium Carbonate 500mg",
+        "generic_name": "Calcium Carbonate",
+        "category": "Suplemen",
+        "description": "Suplemen kalsium untuk kesehatan tulang dan anti-asam.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Magnesium Oxide 400mg",
+        "generic_name": "Magnesium Oxide",
+        "category": "Suplemen",
+        "description": "Suplemen magnesium untuk kesehammer otot dan nerve function.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Zinc Picolinate 25mg",
+        "generic_name": "Zinc Picolinate",
+        "category": "Suplemen",
+        "description": "Form zinc yang memiliki bioavailabilitas tinggi.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Vitamin B Complex 50mg",
+        "generic_name": "Vitamin B Complex",
+        "category": "Suplemen",
+        "description": "Kompleks vitamin B untuk energi dan sistem saraf.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Vitamin C 500mg",
+        "generic_name": "Ascorbic Acid",
+        "category": "Suplemen",
+        "description": "Dosis tinggi vitamin C untuk daya tahan tubuh.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Youvit",
+    },
+    {
+        "name": "Chondroitin 600mg",
+        "generic_name": "Chondroitin Sulfate",
+        "category": "Suplemen",
+        "description": "Suplemen untuk kesehatan jalan sirih dan osteoarthrosis.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Glucosamine 500mg",
+        "generic_name": "Glucosamine Sulfate",
+        "category": "Suplemen",
+        "description": "Suplemen untuk reparasi kartilago dan osteoarthritis.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Melatonin 3mg",
+        "generic_name": "Melatonin",
+        "category": "Suplemen",
+        "description": "Hormon untuk menyuikan tidur dan biorhythm.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "L-Lysine 500mg",
+        "generic_name": "L-Lysine",
+        "category": "Suplemen",
+        "description": "Amino asid esensial untuk imunitas dan pemulihan jaringan.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Probiotics 10 billion CFU",
+        "generic_name": "Probiotic Blend",
+        "category": "Suplemen",
+        "description": "Probiotic untuk kesehatan usus dan sistem imun.",
+        "dosage_form": "Kapsul",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Fiber Supplement 5g",
+        "generic_name": "Psyllium Husk",
+        "category": "Suplemen",
+        "description": "Serat diet untuk kesehatan usus dan penurunan kolesterol.",
+        "dosage_form": "Serbuk",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Electrolyte Powder",
+        "generic_name": "Electrolyte Mix",
+        "category": "Suplemen",
+        "description": "Cairan elektrolit untuk dehidrasi dan aktivitas fisik.",
+        "dosage_form": "Serbuk",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Protein Powder Whey 1kg",
+        "generic_name": "Whey Protein Isolate",
+        "category": "Suplemen",
+        "description": "Protein tinggi untuk masa membangun dan pemulihan otot.",
+        "dosage_form": "Serbuk",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Multivitamin Tablet",
+        "generic_name": "Multivitamin & Mineral",
+        "category": "Suplemen",
+        "description": "Kompleks multivitamin sehari-hari untuk kebutuhan nutrisi.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Cough Syrup",
+        "generic_name": "Dextromethorphan + Guaifenesin",
+        "category": "Ekspektoran",
+        "description": "Sirup pereda batuk dengan deksametorfan dan ekspektoran.",
+        "dosage_form": "Sirup",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Cold & Flu Tablet",
+        "generic_name": "Paracetamol + Phenylephrine + Chlorpheniramine",
+        "category": "Anti-flu",
+        "description": "Perpaduan demam penurun, penghalus naph, dan antihistamin untuk flu dan cold.",
+        "dosage_form": "Tablet",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Sore Throat Lozenges",
+        "generic_name": "Benzocaine + Menthol",
+        "category": "Anti-cough",
+        "description": "Tablet cair untuk meredakansakit tenggorokan dan menggugah tenggorokan.",
+        "dosage_form": "Lozenge",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Antacid Suspension 300ml",
+        "generic_name": "Magnesium Hydroxide + Aluminium Hydroxide",
+        "category": "Antasida",
+        "description": "Suspensi anti-asam untuk gejala maag dan refluks.",
+        "dosage_form": "Suspensi",
+        "manufacturer": "Generik",
+    },
+    {
+        "name": "Oral Rehydration Salts ORS",
+        "generic_name": "ORS Powder",
+        "category": "Elektrolit",
+        "description": "Serbuk ORS untuk dewasa dan anak dalam kondisi dehidrasi.",
+        "dosage_form": "Serbuk",
+        "manufacturer": "Various",
+    },
+]
+
+# Append new drugs to existing list
+drugs_data.extend(NEW_DRUGS)
+
+def seed():
+    db = SessionLocal()
+    try:
+        existing_names = {name for (name,) in db.query(Drug.name).all()}
+        added = 0
+        for data in drugs_data:
+            if data["name"] not in existing_names:
+                db.add(Drug(**data))
+                added += 1
+        db.commit()
+        print(f"Berhasil menambahkan {added} data obat baru.")
+    finally:
+        db.close()
+
+
 if __name__ == "__main__":
     seed()
