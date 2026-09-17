@@ -13,7 +13,7 @@ export default function DrugsPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchDrugs({ search: q, limit: 50 });
+      const data = await fetchDrugs({ search: q, limit: 100 });
       setDrugs(data);
     } catch {
       setError("Gagal mengambil data obat");
