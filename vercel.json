@@ -2,5 +2,16 @@
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/.next",
   "installCommand": "cd frontend && npm install",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api"
+    }
+  ],
+  "env": {
+    "OMNIROUTE_API_KEY": "@omniroute-api-key",
+    "OMNIROUTE_BASE_URL": "https://omniroute.online/v1",
+    "DATABASE_URL": "@database-url"
+  }
 }
