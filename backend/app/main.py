@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
-from .routes import drugs
+from .routes import drugs, ai
 
 app = FastAPI(
     title="PharmAI API",
@@ -18,6 +18,7 @@ app.add_middleware(
 )
 
 app.include_router(drugs.router, prefix="/api")
+app.include_router(ai.router, prefix="/api")
 
 
 @app.get("/api/health")

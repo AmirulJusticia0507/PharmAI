@@ -2,18 +2,25 @@
 
 import { useRef, useState } from "react";
 
-interface ScanResult {
+interface Medication {
   name: string;
   dosage: string;
-  category: string;
-  description: string;
-  confidence: number;
+  frequency: string;
+  duration: string;
 }
 
-export default function ScanPage() {
+interface PrescriptionResult {
+  patient_name?: string;
+  doctor_name?: string;
+  medications: Medication[];
+  notes?: string;
+  raw_text?: string;
+}
+
+export default function OCRPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
-  const [result, setResult] = useState<ScanResult | null>(null);
+  const [result, setResult] = useState<PrescriptionResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -40,23 +47,17 @@ export default function ScanPage() {
     try {
       const blob = await fetch(preview).then((r) => r.blob());
       const formData = new FormData();
-      formData.append("file", blob, "pill.jpg");
+      formData.append("file", blob, "prescription.jpg");
 
-      const res = await fetch("/api/ai/scan-pill", {
+      const res = await fetch("/api/ai/ocr-prescription", {
         method: "POST",
         body: formData,
       });
-      if (!res.ok) throw new Error("Gagal scan");
+      if (!res.ok) throw new Error("Gagal membaca resep");
       const data = await res.json();
       setResult(data);
     } catch {
-      setResult({
-        name: "Gagal mengenali",
-        dosage: "",
-        category: "",
-        description: "Terjadi kesalahan. Coba foto dengan pencahayaan lebih baik.",
-        confidence: 0,
-      });
+      setResult({ raw_text: "Gagal membaca resep. Coba lagi.", medications: [] });
     } finally {
       setScanning(false);
     }
@@ -78,13 +79,13 @@ export default function ScanPage() {
             <a href="/drugs" className="hover:text-blue-600">
               Obat
             </a>
-            <a href="/scan" className="text-blue-600 font-medium">
+            <a href="/scan" className="hover:text-blue-600">
               Scan Pil
             </a>
             <a href="/interactions" className="hover:text-blue-600">
               Interaksi
             </a>
-            <a href="/ocr" className="hover:text-blue-600">
+            <a href="/ocr" className="text-blue-600 font-medium">
               Resep
             </a>
           </div>
@@ -92,9 +93,9 @@ export default function ScanPage() {
       </nav>
 
       <section className="max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-2">Scan Pil / Kapsul</h1>
+        <h1 className="text-2xl font-bold mb-2">OCR Resep Dokter</h1>
         <p className="text-gray-600 mb-6">
-          Unggah foto pil atau kapsul untuk identifikasi otomatis menggunakan AI.
+          Unggah foto resep dokter untuk ditranskrip secara otomatis.
         </p>
 
         {!preview ? (
@@ -104,10 +105,8 @@ export default function ScanPage() {
             className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-blue-400 transition cursor-pointer"
             onClick={() => fileInputRef.current?.click()}
           >
-            <div className="text-4xl mb-4">📷</div>
-            <p className="text-gray-600 mb-2">
-              Seret & lepas foto di sini
-            </p>
+            <div className="text-4xl mb-4">📋</div>
+            <p className="text-gray-600 mb-2">Seret & lepas foto resep di sini</p>
             <p className="text-sm text-gray-400 mb-4">atau klik untuk memilih</p>
             <div className="flex justify-center gap-3">
               <button
@@ -150,7 +149,7 @@ export default function ScanPage() {
             <div className="relative">
               <img
                 src={preview}
-                alt="Preview pil"
+                alt="Preview resep"
                 className="w-full h-64 object-contain bg-gray-100 rounded-xl"
               />
               <button
@@ -167,45 +166,63 @@ export default function ScanPage() {
                 disabled={scanning}
                 className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition disabled:bg-blue-400"
               >
-                {scanning ? "Memindai dengan AI..." : "Mulai Scan"}
+                {scanning ? "Membaca Resep..." : "Baca Resep"}
               </button>
             )}
 
             {result && (
-              <div className="bg-white border rounded-xl p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-lg">{result.name}</h3>
-                  {result.confidence > 0 && (
-                    <span className="text-sm bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                      {Math.round(result.confidence * 100)}% yakin
-                    </span>
-                  )}
-                </div>
-                {result.dosage && (
-                  <p className="text-sm text-gray-500 mb-1">
-                    Dosage: {result.dosage}
-                  </p>
+              <div className="bg-white border rounded-xl p-5 space-y-4">
+                {result.patient_name && (
+                  <div>
+                    <span className="text-sm text-gray-500">Pasien:</span>
+                    <p className="font-medium">{result.patient_name}</p>
+                  </div>
                 )}
-                {result.category && (
-                  <p className="text-sm text-gray-500 mb-1">
-                    Kategori: {result.category}
-                  </p>
+                {result.doctor_name && (
+                  <div>
+                    <span className="text-sm text-gray-500">Dokter:</span>
+                    <p className="font-medium">{result.doctor_name}</p>
+                  </div>
                 )}
-                <p className="text-gray-600 text-sm">{result.description}</p>
-                <div className="mt-4 flex gap-2">
-                  <button
-                    onClick={handleReset}
-                    className="flex-1 border border-gray-300 py-2 rounded-lg text-sm hover:bg-gray-100 transition"
-                  >
-                    Scan Lagi
-                  </button>
-                  <a
-                    href="/drugs"
-                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm text-center hover:bg-blue-700 transition"
-                  >
-                    Lihat Database
-                  </a>
-                </div>
+
+                {result.medications.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold mb-2">Obat:</h3>
+                    <div className="space-y-2">
+                      {result.medications.map((med, i) => (
+                        <div key={i} className="bg-gray-50 p-3 rounded-lg">
+                          <p className="font-medium">{med.name}</p>
+                          <p className="text-sm text-gray-600">
+                            {med.dosage} | {med.frequency} | {med.duration}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {result.notes && (
+                  <div>
+                    <span className="text-sm text-gray-500">Catatan:</span>
+                    <p className="text-sm">{result.notes}</p>
+                  </div>
+                )}
+
+                {result.raw_text && (
+                  <div>
+                    <span className="text-sm text-gray-500">Raw text:</span>
+                    <p className="text-sm bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">
+                      {result.raw_text}
+                    </p>
+                  </div>
+                )}
+
+                <button
+                  onClick={handleReset}
+                  className="w-full border border-gray-300 py-2 rounded-lg text-sm hover:bg-gray-100 transition"
+                >
+                  Scan Lagi
+                </button>
               </div>
             )}
           </div>

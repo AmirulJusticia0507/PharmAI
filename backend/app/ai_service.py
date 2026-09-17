@@ -1,0 +1,132 @@
+import httpx
+import base64
+import os
+
+OMNIROUTE_API_KEY = os.getenv("OMNIROUTE_API_KEY", "")
+OMNIROUTE_BASE_URL = os.getenv("OMNIROUTE_BASE_URL", "https://omniroute.online/v1")
+
+
+async def chat_completion(messages: list[dict], model: str = "auto") -> str:
+    async with httpx.AsyncClient(timeout=60) as client:
+        resp = await client.post(
+            f"{OMNIROUTE_BASE_URL}/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OMNIROUTE_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={"model": model, "messages": messages, "max_tokens": 1024},
+        )
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"]
+
+
+async def analyze_pill_image(image_bytes: bytes, mime: str = "image/jpeg") -> dict:
+    b64 = base64.b64encode(image_bytes).decode()
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": (
+                        "Analyze this pill/capsule image. Return JSON with: "
+                        '{"name": "drug name", "dosage": "dosage", '
+                        '"category": "drug category", '
+                        '"description": "brief description", '
+                        '"confidence": 0.0-1.0}. '
+                        "If unsure, set confidence low. Only return valid JSON."
+                    ),
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:{mime};base64,{b64}"},
+                },
+            ],
+        }
+    ]
+    result = await chat_completion(messages)
+    import json
+
+    try:
+        cleaned = result.strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+        return json.loads(cleaned)
+    except Exception:
+        return {
+            "name": "Unknown",
+            "dosage": "",
+            "category": "",
+            "description": result,
+            "confidence": 0.0,
+        }
+
+
+async def ocr_prescription(image_bytes: bytes, mime: str = "image/jpeg") -> dict:
+    b64 = base64.b64encode(image_bytes).decode()
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": (
+                        "Read and transcribe this handwritten doctor prescription. "
+                        "Return JSON with: "
+                        '{"patient_name": "", "doctor_name": "", '
+                        '"medications": [{"name": "", "dosage": "", "frequency": "", "duration": ""}], '
+                        '"notes": ""}. '
+                        "Only return valid JSON."
+                    ),
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:{mime};base64,{b64}"},
+                },
+            ],
+        }
+    ]
+    result = await chat_completion(messages)
+    import json
+
+    try:
+        cleaned = result.strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+        return json.loads(cleaned)
+    except Exception:
+        return {"raw_text": result, "medications": []}
+
+
+async def check_drug_interactions(drug_names: list[str]) -> dict:
+    drugs_str = ", ".join(drug_names)
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a pharmaceutical expert. Analyze drug interactions. "
+                "Always return valid JSON."
+            ),
+        },
+        {
+            "role": "user",
+            "content": (
+                f"Check interactions between these drugs: {drugs_str}. "
+                "Return JSON: "
+                '{"interactions": [{"drugs": ["A", "B"], "severity": "high/medium/low", '
+                '"description": "explanation", "recommendation": "what to do"}], '
+                '"overall_safety": "safe/caution/unsafe", '
+                '"summary": "brief summary"}.'
+            ),
+        },
+    ]
+    result = await chat_completion(messages)
+    import json
+
+    try:
+        cleaned = result.strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+        return json.loads(cleaned)
+    except Exception:
+        return {"summary": result, "interactions": [], "overall_safety": "unknown"}

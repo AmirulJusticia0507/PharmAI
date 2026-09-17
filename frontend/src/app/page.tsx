@@ -8,6 +8,7 @@ export default function Home() {
             <a href="/drugs" className="hover:text-blue-600">Obat</a>
             <a href="/scan" className="hover:text-blue-600">Scan Pil</a>
             <a href="/interactions" className="hover:text-blue-600">Interaksi</a>
+            <a href="/ocr" className="hover:text-blue-600">Resep</a>
           </div>
         </div>
       </nav>
