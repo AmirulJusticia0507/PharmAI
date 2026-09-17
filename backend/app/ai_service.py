@@ -1,18 +1,23 @@
 import httpx
 import base64
 import os
+from dotenv import load_dotenv
 
-OMNIROUTE_API_KEY = os.getenv("OMNIROUTE_API_KEY", "")
-OMNIROUTE_BASE_URL = os.getenv("OMNIROUTE_BASE_URL", "https://omniroute.online/v1")
+load_dotenv()
+
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 
-async def chat_completion(messages: list[dict], model: str = "auto") -> str:
+async def chat_completion(messages: list[dict], model: str = "openai/gpt-3.5-turbo") -> str:
     async with httpx.AsyncClient(timeout=60) as client:
         resp = await client.post(
-            f"{OMNIROUTE_BASE_URL}/chat/completions",
+            f"{OPENROUTER_BASE_URL}/chat/completions",
             headers={
-                "Authorization": f"Bearer {OMNIROUTE_API_KEY}",
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
+                "HTTP-Referer": "http://localhost:8000",
+                "X-Title": "PharmAI",
             },
             json={"model": model, "messages": messages, "max_tokens": 1024},
         )

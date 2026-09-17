@@ -4,7 +4,7 @@ import { fetchDrugs, type Drug } from "@/lib/api";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 export default function DrugsPage() {
   const [drugs, setDrugs] = useState<Drug[]>([]);

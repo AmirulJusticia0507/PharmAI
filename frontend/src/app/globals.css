@@ -2705,3 +2705,91 @@
         font-size: 18px;
     }
 }
+
+/* Drug Autocomplete Dropdown */
+.drug-autocomplete {
+    position: relative;
+}
+
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 47px;
+    right: 42px;
+    z-index: 50;
+    background: #fff;
+    border: 1px solid #d9e4d9;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 2px;
+}
+
+.autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background .15s ease;
+    border-bottom: 1px solid #f0f4ef;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: 0;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.highlighted {
+    background: #f0f7ed;
+}
+
+.autocomplete-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1a2a1a;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.autocomplete-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 10px;
+    color: #84928a;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.autocomplete-category {
+    text-transform: capitalize;
+}
+
+.autocomplete-generic {
+    font-style: italic;
+}
+
+.autocomplete-empty {
+    padding: 12px;
+    text-align: center;
+    font-size: 12px;
+    color: #9aa89f;
+}
+
+.drug-input-row .autocomplete-dropdown {
+    left: 47px;
+    right: 0;
+}
+
+.drug-input-row:has(.autocomplete-dropdown) {
+    border-radius: 6px 6px 0 0;
+}
+
+.drug-input-row:has(.autocomplete-dropdown) input {
+    border-radius: 6px 6px 0 0;
+}
