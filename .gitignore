@@ -32,3 +32,6 @@ build/
 
 # Vercel
 .vercel/
+
+.vercel
+homepage.png
