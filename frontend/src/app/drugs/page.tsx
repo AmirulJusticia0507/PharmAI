@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchDrugs, type Drug } from "@/lib/api";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function DrugsPage() {
@@ -56,13 +57,13 @@ export default function DrugsPage() {
 
 function DrugCard({ drug }: { drug: Drug }) {
   return (
-    <article className="drug-card">
+    <Link href={`/drugs/${drug.id}`} className="drug-card" aria-label={`Lihat detail ${drug.name}`}>
       <div className="drug-card-top"><div className={`drug-avatar ${drug.image_url ? "has-image" : ""}`}>{drug.image_url ? <img src={drug.image_url} alt="" /> : <span>{drug.name.charAt(0).toUpperCase()}</span>}</div>{drug.category && <span className="drug-category">{drug.category}</span>}</div>
       <h2>{drug.name}</h2>
       {drug.generic_name && <p className="drug-generic">{drug.generic_name}</p>}
       <div className="drug-details">{drug.dosage_form && <span><b>BENTUK</b>{drug.dosage_form}</span>}{drug.manufacturer && <span><b>PRODUSEN</b>{drug.manufacturer}</span>}</div>
       {drug.description && <p className="drug-description">{drug.description}</p>}
       <div className="drug-card-footer"><span>ID {String(drug.id).padStart(3, "0")}</span><span className="drug-card-mark" aria-hidden="true">✦</span></div>
-    </article>
+    </Link>
   );
 }

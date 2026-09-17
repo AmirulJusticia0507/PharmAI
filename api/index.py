@@ -166,3 +166,39 @@ def list_drugs(
             }
             for d in drugs
         ]
+
+
+@app.get("/api/drugs/{drug_id}")
+def get_drug(drug_id: int):
+    from sqlalchemy import Column, DateTime, Integer, String, Text, create_engine
+    from sqlalchemy.orm import DeclarativeBase, Session
+
+    database_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/pharmaidb")
+    engine = create_engine(database_url)
+
+    class Base(DeclarativeBase):
+        pass
+
+    class Drug(Base):
+        __tablename__ = "drugs"
+        id = Column(Integer, primary_key=True)
+        name = Column(String(255))
+        generic_name = Column(String(255))
+        category = Column(String(100))
+        description = Column(Text)
+        dosage_form = Column(String(100))
+        manufacturer = Column(String(255))
+        image_url = Column(String(500))
+        created_at = Column(DateTime)
+        updated_at = Column(DateTime)
+
+    with Session(engine) as db:
+        drug = db.query(Drug).filter(Drug.id == drug_id).first()
+        if not drug:
+            raise HTTPException(status_code=404, detail="Drug not found")
+        return {
+            "id": drug.id, "name": drug.name, "generic_name": drug.generic_name,
+            "category": drug.category, "description": drug.description,
+            "dosage_form": drug.dosage_form, "manufacturer": drug.manufacturer,
+            "image_url": drug.image_url,
+        }
