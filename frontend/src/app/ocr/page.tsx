@@ -41,6 +41,8 @@ export default function OCRPage() {
     if (file && file.type.startsWith("image/")) handleFile(file);
   };
 
+  const openFilePicker = () => fileInputRef.current?.click();
+
   const handleScan = async () => {
     if (!preview) return;
     setScanning(true);
@@ -69,164 +71,11 @@ export default function OCRPage() {
   };
 
   return (
-    <main className="min-h-screen">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <a href="/" className="text-xl font-bold text-blue-600">
-            PharmAI
-          </a>
-          <div className="flex gap-4 text-sm">
-            <a href="/drugs" className="hover:text-blue-600">
-              Obat
-            </a>
-            <a href="/scan" className="hover:text-blue-600">
-              Scan Pil
-            </a>
-            <a href="/interactions" className="hover:text-blue-600">
-              Interaksi
-            </a>
-            <a href="/ocr" className="text-blue-600 font-medium">
-              Resep
-            </a>
-          </div>
-        </div>
-      </nav>
-
-      <section className="max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-2">OCR Resep Dokter</h1>
-        <p className="text-gray-600 mb-6">
-          Unggah foto resep dokter untuk ditranskrip secara otomatis.
-        </p>
-
-        {!preview ? (
-          <div
-            onDrop={handleDrop}
-            onDragOver={(e) => e.preventDefault()}
-            className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-blue-400 transition cursor-pointer"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <div className="text-4xl mb-4">📋</div>
-            <p className="text-gray-600 mb-2">Seret & lepas foto resep di sini</p>
-            <p className="text-sm text-gray-400 mb-4">atau klik untuk memilih</p>
-            <div className="flex justify-center gap-3">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  fileInputRef.current?.click();
-                }}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
-              >
-                Pilih File
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  cameraInputRef.current?.click();
-                }}
-                className="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-100 transition"
-              >
-                Ambil Foto
-              </button>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="relative">
-              <img
-                src={preview}
-                alt="Preview resep"
-                className="w-full h-64 object-contain bg-gray-100 rounded-xl"
-              />
-              <button
-                onClick={handleReset}
-                className="absolute top-2 right-2 bg-white/80 backdrop-blur text-gray-600 w-8 h-8 rounded-full hover:bg-white transition"
-              >
-                ✕
-              </button>
-            </div>
-
-            {!result && (
-              <button
-                onClick={handleScan}
-                disabled={scanning}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition disabled:bg-blue-400"
-              >
-                {scanning ? "Membaca Resep..." : "Baca Resep"}
-              </button>
-            )}
-
-            {result && (
-              <div className="bg-white border rounded-xl p-5 space-y-4">
-                {result.patient_name && (
-                  <div>
-                    <span className="text-sm text-gray-500">Pasien:</span>
-                    <p className="font-medium">{result.patient_name}</p>
-                  </div>
-                )}
-                {result.doctor_name && (
-                  <div>
-                    <span className="text-sm text-gray-500">Dokter:</span>
-                    <p className="font-medium">{result.doctor_name}</p>
-                  </div>
-                )}
-
-                {result.medications.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold mb-2">Obat:</h3>
-                    <div className="space-y-2">
-                      {result.medications.map((med, i) => (
-                        <div key={i} className="bg-gray-50 p-3 rounded-lg">
-                          <p className="font-medium">{med.name}</p>
-                          <p className="text-sm text-gray-600">
-                            {med.dosage} | {med.frequency} | {med.duration}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {result.notes && (
-                  <div>
-                    <span className="text-sm text-gray-500">Catatan:</span>
-                    <p className="text-sm">{result.notes}</p>
-                  </div>
-                )}
-
-                {result.raw_text && (
-                  <div>
-                    <span className="text-sm text-gray-500">Raw text:</span>
-                    <p className="text-sm bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">
-                      {result.raw_text}
-                    </p>
-                  </div>
-                )}
-
-                <button
-                  onClick={handleReset}
-                  className="w-full border border-gray-300 py-2 rounded-lg text-sm hover:bg-gray-100 transition"
-                >
-                  Scan Lagi
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+    <main className="ocr-shell">
+      <nav className="site-nav"><div className="nav-inner"><a href="/" className="brand" aria-label="PharmAI beranda"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></a><div className="nav-links"><a href="/drugs">Database Obat</a><a href="/interactions">Interaksi</a><a href="/ocr" className="ocr-nav-active">Resep</a></div><a href="/scan" className="nav-action">Mulai scan <span aria-hidden="true">↗</span></a></div></nav>
+      <section className="ocr-page">
+        <div className="ocr-heading"><div><span className="section-kicker">PHARMAI READ</span><h1>Baca resep,<br /><em>lebih sederhana.</em></h1><p>Ubah tulisan resep dokter menjadi informasi yang lebih terstruktur dan mudah dipahami.</p></div><div className="ocr-step"><span>01</span><div><strong>UNGGAH RESEP</strong><small>Foto JPG, PNG hingga 10 MB</small></div></div></div>
+        {!preview ? <div className="ocr-workspace"><div onDrop={handleDrop} onDragOver={(e) => e.preventDefault()} onClick={openFilePicker} className="ocr-upload" role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") openFilePicker(); }}><div className="ocr-paper-icon"><span>≡</span></div><span className="upload-kicker">MULAI DARI SINI</span><h2>Letakkan foto resep Anda<br /><em>di area ini.</em></h2><p>Seret & lepas foto, atau pilih dari perangkat Anda.</p><div className="upload-actions"><button onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }} className="primary-action">Pilih dari perangkat <span aria-hidden="true">↗</span></button><button onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }} className="camera-action"><span aria-hidden="true">◎</span> Buka kamera</button></div><div className="upload-meta"><span>⌁</span> Pastikan seluruh resep terlihat di dalam bingkai</div><input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" /><input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" /></div><aside className="ocr-tips"><span className="section-kicker">TIPS FOTO RESEP</span><h3>Tulisan yang jelas membantu AI membaca lebih baik.</h3><div className="tip-list"><div><span>01</span><p>Foto resep dari atas, jangan miring.</p></div><div><span>02</span><p>Gunakan pencahayaan merata tanpa silau.</p></div><div><span>03</span><p>Pastikan tulisan tidak terpotong.</p></div></div></aside></div> : <div className="ocr-workspace ocr-preview-workspace"><div className="ocr-preview-panel"><div className="preview-label"><span>RESEP SIAP DIBACA</span><button onClick={handleReset} aria-label="Hapus foto">✕</button></div><img src={preview} alt="Preview resep" /></div><div className="ocr-result-column">{!result && <div className="ocr-ready"><span className="section-kicker">LANGKAH BERIKUTNYA</span><h2>Resep Anda sudah siap.</h2><p>PharmAI akan mengenali identitas, obat, dosis, dan instruksi yang tertulis.</p><button onClick={handleScan} disabled={scanning} className="primary-action scan-submit">{scanning ? "Membaca resep..." : "Mulai baca dengan AI"}<span aria-hidden="true">→</span></button><button onClick={handleReset} className="reset-action">Pilih foto lain</button></div>}{result && <div className="ocr-result-card"><div className="result-card-top"><span className="section-kicker">TRANSKRIP RESEP</span><span className="ocr-count">{result.medications.length.toString().padStart(2, "0")} OBAT</span></div>{(result.patient_name || result.doctor_name) && <div className="prescription-meta">{result.patient_name && <span><b>PASIEN</b>{result.patient_name}</span>}{result.doctor_name && <span><b>DOKTER</b>{result.doctor_name}</span>}</div>}{result.medications.length > 0 && <div className="medication-list"><h3>Daftar obat</h3>{result.medications.map((med, i) => <div className="medication-row" key={i}><span className="medication-index">0{i + 1}</span><div><strong>{med.name}</strong><p>{med.dosage} <span>·</span> {med.frequency} <span>·</span> {med.duration}</p></div></div>)}</div>}{result.notes && <div className="ocr-note"><b>CATATAN</b><p>{result.notes}</p></div>}{result.raw_text && <div className="raw-prescription"><b>TRANSKRIP MENTAH</b><p>{result.raw_text}</p></div>}<button onClick={handleReset} className="reset-action">Baca resep lain</button></div>}</div></div>}
       </section>
     </main>
   );
