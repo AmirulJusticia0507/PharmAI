@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { fetchDrugs, type Drug } from "@/lib/api";
+import { useEffect, useState } from "react";
 
 export default function DrugsPage() {
   const [drugs, setDrugs] = useState<Drug[]>([]);
@@ -32,66 +32,23 @@ export default function DrugsPage() {
   };
 
   return (
-    <main className="min-h-screen">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <a href="/" className="text-xl font-bold text-blue-600">
-            PharmAI
-          </a>
-          <div className="flex gap-4 text-sm">
-            <a href="/drugs" className="text-blue-600 font-medium">
-              Obat
-            </a>
-            <a href="/scan" className="hover:text-blue-600">
-              Scan Pil
-            </a>
-            <a href="/interactions" className="hover:text-blue-600">
-              Interaksi
-            </a>
-          </div>
+    <main className="drugs-shell">
+      <nav className="site-nav">
+        <div className="nav-inner">
+          <a href="/" className="brand" aria-label="PharmAI beranda"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></a>
+          <div className="nav-links"><a href="/drugs" className="drugs-nav-active">Database Obat</a><a href="/interactions">Interaksi</a><a href="/ocr">Resep</a></div>
+          <a href="/scan" className="nav-action">Mulai scan <span aria-hidden="true">↗</span></a>
         </div>
       </nav>
 
-      <section className="max-w-7xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Database Obat</h1>
+      <section className="drugs-page">
+        <div className="drugs-heading"><div><span className="section-kicker">PHARMAI LIBRARY</span><h1>Temukan obat,<br /><em>lebih mudah.</em></h1><p>Jelajahi informasi obat yang terkurasi untuk membantu Anda memahami apa yang dikonsumsi.</p></div><div className="library-stamp"><span>DATABASE</span><strong>{loading ? "--" : String(drugs.length).padStart(2, "0")}</strong><small>entri tersedia</small></div></div>
 
-        <form onSubmit={handleSearch} className="flex gap-2 mb-6">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari obat berdasarkan nama..."
-            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-          >
-            Cari
-          </button>
-        </form>
+        <form onSubmit={handleSearch} className="drug-search"><span className="search-icon" aria-hidden="true">⌕</span><input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nama obat, generik, atau kategori..." aria-label="Cari obat" /><button type="submit">Cari <span aria-hidden="true">→</span></button></form>
+        <div className="catalog-toolbar"><span><strong>{loading ? "Memuat" : drugs.length}</strong> obat ditemukan</span><span className="catalog-note"><i /> Informasi untuk referensi, bukan pengganti konsultasi medis</span></div>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
-
-        {loading ? (
-          <div className="text-center py-12 text-gray-500">Memuat data...</div>
-        ) : drugs.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            {search
-              ? `Tidak ada obat ditemukan untuk "${search}"`
-              : "Belum ada data obat"}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {drugs.map((drug) => (
-              <DrugCard key={drug.id} drug={drug} />
-            ))}
-          </div>
-        )}
+        {error && <div className="drugs-error"><strong>Data belum dapat dimuat.</strong><span>{error}</span><button onClick={() => loadDrugs(search)}>Coba lagi</button></div>}
+        {loading ? <div className="drug-grid"><div className="drug-skeleton" /><div className="drug-skeleton" /><div className="drug-skeleton" /></div> : drugs.length === 0 ? <div className="empty-drugs"><span>⌁</span><h2>{search ? `Tidak ada obat untuk "${search}"` : "Belum ada data obat"}</h2><p>Coba kata kunci lain atau mulai dengan memindai obat.</p><a href="/scan" className="primary-action">Scan obat <span aria-hidden="true">↗</span></a></div> : <div className="drug-grid">{drugs.map((drug) => <DrugCard key={drug.id} drug={drug} />)}</div>}
       </section>
     </main>
   );
@@ -99,29 +56,13 @@ export default function DrugsPage() {
 
 function DrugCard({ drug }: { drug: Drug }) {
   return (
-    <div className="bg-white p-5 rounded-xl shadow-sm border hover:shadow-md transition">
-      <div className="flex items-start justify-between mb-2">
-        <h3 className="font-semibold text-lg">{drug.name}</h3>
-        {drug.category && (
-          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-            {drug.category}
-          </span>
-        )}
-      </div>
-      {drug.generic_name && (
-        <p className="text-sm text-gray-500 mb-1">Generik: {drug.generic_name}</p>
-      )}
-      {drug.dosage_form && (
-        <p className="text-sm text-gray-500 mb-1">Bentuk: {drug.dosage_form}</p>
-      )}
-      {drug.manufacturer && (
-        <p className="text-sm text-gray-500 mb-2">
-          Produsen: {drug.manufacturer}
-        </p>
-      )}
-      {drug.description && (
-        <p className="text-sm text-gray-600 line-clamp-2">{drug.description}</p>
-      )}
-    </div>
+    <article className="drug-card">
+      <div className="drug-card-top"><div className={`drug-avatar ${drug.image_url ? "has-image" : ""}`}>{drug.image_url ? <img src={drug.image_url} alt="" /> : <span>{drug.name.charAt(0).toUpperCase()}</span>}</div>{drug.category && <span className="drug-category">{drug.category}</span>}</div>
+      <h2>{drug.name}</h2>
+      {drug.generic_name && <p className="drug-generic">{drug.generic_name}</p>}
+      <div className="drug-details">{drug.dosage_form && <span><b>BENTUK</b>{drug.dosage_form}</span>}{drug.manufacturer && <span><b>PRODUSEN</b>{drug.manufacturer}</span>}</div>
+      {drug.description && <p className="drug-description">{drug.description}</p>}
+      <div className="drug-card-footer"><span>ID {String(drug.id).padStart(3, "0")}</span><span className="drug-card-mark" aria-hidden="true">✦</span></div>
+    </article>
   );
 }

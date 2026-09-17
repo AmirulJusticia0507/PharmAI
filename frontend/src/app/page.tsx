@@ -1,65 +1,45 @@
 export default function Home() {
   return (
-    <main className="min-h-screen">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-blue-600">PharmAI</h1>
-          <div className="flex gap-4 text-sm">
-            <a href="/drugs" className="hover:text-blue-600">Obat</a>
-            <a href="/scan" className="hover:text-blue-600">Scan Pil</a>
-            <a href="/interactions" className="hover:text-blue-600">Interaksi</a>
-            <a href="/ocr" className="hover:text-blue-600">Resep</a>
-          </div>
+    <main className="pharma-shell">
+      <nav className="site-nav">
+        <div className="nav-inner">
+          <a href="/" className="brand" aria-label="PharmAI beranda"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></a>
+          <div className="nav-links"><a href="/drugs">Database Obat</a><a href="/interactions">Interaksi</a><a href="/ocr">Resep</a></div>
+          <a href="/scan" className="nav-action">Mulai scan <span aria-hidden="true">↗</span></a>
         </div>
       </nav>
 
-      <section className="max-w-7xl mx-auto px-4 py-16 text-center">
-        <h2 className="text-4xl font-bold mb-4">AI Analisis Obat</h2>
-        <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-8">
-          Platform untuk identifikasi obat, deteksi interaksi, dan analisis
-          berbasis kecerdasan buatan.
-        </p>
-        <div className="flex justify-center gap-4">
-          <a
-            href="/scan"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-          >
-            Mulai Scan
-          </a>
-          <a
-            href="/drugs"
-            className="border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-100 transition"
-          >
-            Lihat Database
-          </a>
+      <section className="hero-section">
+        <div className="hero-copy">
+          <div className="eyebrow"><span className="pulse-dot" /> Asisten kesehatan digital Anda</div>
+          <h1>Kenali obat.<br /><em>Jaga kesehatan.</em></h1>
+          <p className="hero-description">PharmAI membantu Anda memahami obat, membaca resep, dan menemukan potensi interaksi dengan lebih cepat dan tenang.</p>
+          <div className="hero-actions"><a href="/scan" className="primary-action">Scan obat sekarang <span aria-hidden="true">→</span></a><a href="/drugs" className="text-action">Jelajahi database <span aria-hidden="true">↗</span></a></div>
+          <div className="trust-line"><span className="trust-avatars"><i /><i /><i /></span> Dipakai untuk keputusan yang lebih aman</div>
+        </div>
+        <div className="hero-visual">
+          <div className="visual-glow" />
+          <div className="scan-card">
+            <div className="scan-card-top"><span>ANALISIS TERKINI</span><span className="live-status">● LIVE</span></div>
+            <div className="medicine-photo"><img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=900&q=85" alt="Kapsul dan obat di atas meja" /></div>
+            <div className="scan-result"><div><span className="result-label">HASIL IDENTIFIKASI</span><strong>Amoxicillin 500 mg</strong></div><span className="confidence">98%</span></div>
+            <div className="result-bar"><span /></div>
+          </div>
+          <div className="floating-note note-top"><span className="note-icon">✓</span><div><strong>Aman digunakan</strong><small>Analisis selesai</small></div></div>
+          <div className="floating-note note-bottom"><span className="note-icon blue">⌁</span><div><strong>3 fitur pintar</strong><small>Dalam satu platform</small></div></div>
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <FeatureCard
-            title="Identifikasi Pil"
-            desc="Scan foto pil/kapsul untuk identifikasi otomatis."
-          />
-          <FeatureCard
-            title="Cek Interaksi Obat"
-            desc="Pastikan keamanan kombinasi obat yang dikonsumsi."
-          />
-          <FeatureCard
-            title="Transkrip Resep"
-            desc="OCR untuk membaca tulisan tangan resep dokter."
-          />
+      <section className="feature-section">
+        <div className="section-heading"><span className="section-kicker">SATU PLATFORM, LEBIH TENANG</span><h2>Yang Anda butuhkan<br /><span>untuk memahami obat.</span></h2></div>
+        <div className="feature-grid">
+          <a href="/scan" className="feature-card feature-blue"><span className="feature-icon">⌕</span><span className="card-number">01</span><h3>Identifikasi pil</h3><p>Kenali pil dan kapsul dari foto dengan bantuan analisis visual AI.</p><span className="card-arrow">↗</span></a>
+          <a href="/interactions" className="feature-card feature-lime"><span className="feature-icon">◌</span><span className="card-number">02</span><h3>Cek interaksi</h3><p>Periksa kombinasi obat dan pahami hal penting sebelum dikonsumsi.</p><span className="card-arrow">↗</span></a>
+          <a href="/ocr" className="feature-card feature-white"><span className="feature-icon">≡</span><span className="card-number">03</span><h3>Transkrip resep</h3><p>Ubah tulisan resep dokter menjadi informasi yang lebih mudah dibaca.</p><span className="card-arrow">↗</span></a>
         </div>
       </section>
+
+      <footer className="site-footer"><div className="brand"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></div><span>Teknologi untuk keputusan kesehatan yang lebih baik.</span><span>© 2025 PharmAI</span></footer>
     </main>
-  );
-}
-
-function FeatureCard({ title, desc }: { title: string; desc: string }) {
-  return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition">
-      <h3 className="font-semibold text-lg mb-2">{title}</h3>
-      <p className="text-gray-600 text-sm">{desc}</p>
-    </div>
   );
 }

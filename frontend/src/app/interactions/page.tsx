@@ -27,6 +27,18 @@ const SAFETY_COLOR: Record<string, string> = {
   unsafe: "bg-red-100 text-red-700",
 };
 
+const bgColors = {
+  safe: "bg-green-50",
+  caution: "bg-yellow-50",
+  unsafe: "bg-red-50",
+};
+
+const textColors = {
+  safe: "text-green-600",
+  caution: "text-yellow-600",
+  unsafe: "text-red-600",
+};
+
 export default function InteractionsPage() {
   const [drugs, setDrugs] = useState(["", ""]);
   const [result, setResult] = useState<InteractionResult | null>(null);
@@ -71,125 +83,15 @@ export default function InteractionsPage() {
   };
 
   return (
-    <main className="min-h-screen">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <a href="/" className="text-xl font-bold text-blue-600">
-            PharmAI
-          </a>
-          <div className="flex gap-4 text-sm">
-            <a href="/drugs" className="hover:text-blue-600">
-              Obat
-            </a>
-            <a href="/scan" className="hover:text-blue-600">
-              Scan Pil
-            </a>
-            <a href="/interactions" className="text-blue-600 font-medium">
-              Interaksi
-            </a>
-            <a href="/ocr" className="hover:text-blue-600">
-              Resep
-            </a>
-          </div>
+    <main className="interaction-shell">
+      <nav className="site-nav"><div className="nav-inner"><a href="/" className="brand" aria-label="PharmAI beranda"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></a><div className="nav-links"><a href="/drugs">Database Obat</a><a href="/interactions" className="interactions-nav-active">Interaksi</a><a href="/ocr">Resep</a></div><a href="/scan" className="nav-action">Mulai scan <span aria-hidden="true">↗</span></a></div></nav>
+      <section className="interaction-page">
+        <div className="interaction-heading"><div><span className="section-kicker">PHARMAI SAFETY CHECK</span><h1>Minum lebih aman,<br /><em>mulai dari sini.</em></h1><p>Masukkan obat yang dikonsumsi bersamaan. PharmAI akan membantu menemukan potensi interaksi yang perlu diperhatikan.</p></div><div className="safety-mark"><span>✦</span><small>ANALISIS<br />BERBASIS AI</small></div></div>
+        <div className="interaction-layout">
+          <form onSubmit={handleCheck} className="interaction-form"><div className="form-top"><div><span className="section-kicker">DAFTAR OBAT</span><h2>Apa saja yang Anda konsumsi?</h2></div><span className="drug-counter">{drugs.filter((drug) => drug.trim()).length.toString().padStart(2, "0")} OBAT</span></div><p className="form-helper">Tambahkan minimal dua obat untuk memulai pemeriksaan.</p><div className="drug-inputs">{drugs.map((drug, i) => <div key={i} className="drug-input-row"><span className="input-index">0{i + 1}</span><input type="text" value={drug} onChange={(e) => updateDrug(i, e.target.value)} placeholder={`Nama obat ${i + 1}`} aria-label={`Nama obat ${i + 1}`} />{drugs.length > 2 && <button type="button" onClick={() => removeDrug(i)} aria-label={`Hapus obat ${i + 1}`}>✕</button>}</div>)}</div><button type="button" onClick={addDrug} className="add-drug">+ Tambah obat lain</button><button type="submit" disabled={loading} className="primary-action interaction-submit">{loading ? "Menganalisis kombinasi..." : "Periksa interaksi"}<span aria-hidden="true">→</span></button>{error && <div className="interaction-error">{error}</div>}</form>
+          <aside className="interaction-aside"><span className="section-kicker">CARA KERJA</span><h3>Informasi yang lebih jelas untuk keputusan yang lebih tenang.</h3><div className="interaction-steps"><div><span>01</span><p>Masukkan semua obat yang sedang dikonsumsi.</p></div><div><span>02</span><p>AI membandingkan kombinasi dan tingkat risikonya.</p></div><div><span>03</span><p>Baca rekomendasi yang relevan untuk langkah berikutnya.</p></div></div><small className="medical-note">Hasil ini bersifat informatif. Selalu konsultasikan perubahan obat dengan tenaga kesehatan.</small></aside>
         </div>
-      </nav>
-
-      <section className="max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-2">Cek Interaksi Obat</h1>
-        <p className="text-gray-600 mb-6">
-          Masukkan nama obat yang dikonsumsi bersamaan untuk mengecek potensi
-          interaksi.
-        </p>
-
-        <form onSubmit={handleCheck} className="space-y-3 mb-6">
-          {drugs.map((drug, i) => (
-            <div key={i} className="flex gap-2">
-              <input
-                type="text"
-                value={drug}
-                onChange={(e) => updateDrug(i, e.target.value)}
-                placeholder={`Obat ${i + 1}`}
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              {drugs.length > 2 && (
-                <button
-                  type="button"
-                  onClick={() => removeDrug(i)}
-                  className="text-gray-400 hover:text-red-500 px-2"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          ))}
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={addDrug}
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-              + Tambah Obat
-            </button>
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition disabled:bg-blue-400"
-          >
-            {loading ? "Menganalisis..." : "Cek Interaksi"}
-          </button>
-        </form>
-
-        {error && (
-          <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
-
-        {result && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="font-medium">Keamanan:</span>
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  SAFETY_COLOR[result.overall_safety] || "bg-gray-100"
-                }`}
-              >
-                {result.overall_safety.toUpperCase()}
-              </span>
-            </div>
-
-            <p className="text-gray-700">{result.summary}</p>
-
-            {result.interactions.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="font-semibold">Detail Interaksi:</h3>
-                {result.interactions.map((inter, i) => (
-                  <div key={i} className="bg-white border rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-medium">
-                        {inter.drugs.join(" + ")}
-                      </span>
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
-                          SEVERITY_COLOR[inter.severity]
-                        }`}
-                      >
-                        {inter.severity}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-1">
-                      {inter.description}
-                    </p>
-                    <p className="text-sm text-blue-600">
-                      Rekomendasi: {inter.recommendation}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        {result && <section className={`interaction-result safety-${result.overall_safety}`}><div className="result-overview"><div><span className="section-kicker">HASIL PEMERIKSAAN</span><h2>Kombinasi obat Anda</h2><p>{result.summary}</p></div><div className="safety-status"><span className="status-orb">{result.overall_safety === "safe" ? "✓" : "!"}</span><small>STATUS KEAMANAN</small><strong>{result.overall_safety.toUpperCase()}</strong></div></div>{result.interactions.length > 0 && <div className="interaction-list"><div className="result-list-heading"><span>DETAIL YANG PERLU DIPERHATIKAN</span><span>{result.interactions.length.toString().padStart(2, "0")} TEMUAN</span></div>{result.interactions.map((inter, i) => <article key={i} className={`interaction-item severity-${inter.severity}`}><div className="interaction-item-head"><span className="severity-dot" /><strong>{inter.drugs.join(" + ")}</strong><span className="severity-label">{inter.severity}</span></div><p>{inter.description}</p><div className="recommendation"><span>REKOMENDASI</span><p>{inter.recommendation}</p></div></article>)}</div>}</section>}
       </section>
     </main>
   );
