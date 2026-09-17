@@ -3,8 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from .database import engine, Base
 from .routes import drugs, ai
+import os
 
 load_dotenv()
+
+# CORS origins dari env (comma-separated) atau default allow all
+cors_origins = os.getenv("CORS_ORIGINS", "*").split(",")
 
 app = FastAPI(
     title="PharmAI API",
@@ -14,7 +18,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[o.strip() for o in cors_origins],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
