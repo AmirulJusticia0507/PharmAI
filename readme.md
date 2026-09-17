@@ -1,52 +1,122 @@
-# PharmAI — Rangkuman Sistem & Fitur AI Analisis Obat
+# PharmAI — AI Analisis Obat
 
-Dokumen ini memuat rangkuman penerapan Artificial Intelligence (AI) dalam analisis obat, mencakup kategori konsumen, riset farmasi, aplikasi populer di pasaran, serta opsi *Open Source* untuk pengembang.
-
----
-
-## 1. Klasifikasi AI dalam Bidang Obat-obatan
-
-AI untuk analisis obat terbagi menjadi dua ranah utama:
-
-*   **Aplikasi Konsumen (Sehari-hari):**
-    *   **Pill Visual Identification** — Memindai foto fisik pil/kapsul (bentuk, warna, imprint).
-    *   **Prescription OCR Scanner** — Membaca dan mentranskrip tulisan tangan resep dokter.
-    *   **Interaction Checker** — Menganalisis potensi kontradiksi atau efek samping jika beberapa obat dikonsumsi bersamaan.
-*   **Riset Farmasi & Lab (Drug Discovery):**
-    *   **Virtual Molecular Screening** — Simulasi jutaan struktur kimia untuk menemukan kandidat obat.
-    *   **Toxicity & Efficacy Prediction** — Memprediksi keamanan dan efektivitas senyawa sebelum uji klinis.
-    *   **Herbal Compounds Analysis** — Pemodelan senyawa aktif tanaman obat tradisional (kunyit, temulawak, dll.).
+Platform analisis obat berbasis AI dengan frontend Next.js, backend FastAPI, dan database PostgreSQL.
 
 ---
 
-## 2. Matriks Aplikasi & Fitur AI
+## Tech Stack
 
-| Aplikasi / Proyek | Lisensi | Target | Fitur Utama | Teknologi |
-| :--- | :--- | :--- | :--- | :--- |
-| **AI Pill ID** | Freemium | Pasien | Scan pil lepas via kamera, cek interaksi obat, basis data dosis & efek samping | Computer Vision |
-| **PillLens / Smart Pill ID** | Freemium | Pasien | Scan bentuk obat dan pemindaian label kemasan | Computer Vision |
-| **Drugs.com Identifier** | Gratis (Web/App) | Pasien & Medis | Pencarian & pencocokan manual/foto berdasarkan kode fisik (*imprint*) | Database Matching |
-| **MediScribe AI** | Open Source (MIT) | Developer | OCR tulisan tangan resep dokter menjadi teks digital | Handwritten OCR / VLM |
-| **PillSearch (YOLOv8)** | Open Source | Developer | Deteksi dan pemisahan objek pil dari foto | YOLOv8, FastSAM |
-| **PrescriptoAI / Rx-OCR** | API (Pay-as-you-go) | Integrasi Dev | API pembacaan resep fisik untuk sistem informasi apotek | OCR API |
+| Layer | Teknologi |
+| :--- | :--- |
+| Frontend | Next.js 15 (App Router, TypeScript, Tailwind CSS) |
+| Backend | FastAPI (Python 3.11+) |
+| Database | PostgreSQL |
+| Deploy | Vercel (Frontend) + Railway/Fly.io (Backend) |
 
 ---
 
-## 3. Ringkasan Fitur AI
+## Struktur Proyek
 
-| Fitur | Deskripsi | Teknologi |
+```
+PharmAI/
+├── frontend/             # Next.js app
+│   ├── src/app/          # App Router pages
+│   ├── src/components/   # Reusable components
+│   ├── src/lib/          # API client & utilities
+│   └── package.json
+├── backend/              # FastAPI app
+│   ├── app/
+│   │   ├── main.py       # Entry point
+│   │   ├── database.py   # DB connection
+│   │   ├── models.py     # SQLAlchemy models
+│   │   ├── schemas.py    # Pydantic schemas
+│   │   └── routes/       # API routes
+│   └── requirements.txt
+├── vercel.json           # Vercel deploy config
+└── .gitignore
+```
+
+---
+
+## Setup Lokal
+
+### Prerequisites
+
+- Python 3.11+
+- Node.js 18+
+- PostgreSQL
+
+### 1. Backend
+
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate        # Windows
+# source .venv/bin/activate   # macOS/Linux
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+API docs: `http://localhost:8000/docs`
+
+### 2. Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+App: `http://localhost:3000`
+
+### 3. Environment Variables
+
+Buat file `.env` di `backend/`:
+
+```
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/pharmaidb
+```
+
+Buat file `.env.local` di `frontend/`:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+---
+
+## Deploy ke Vercel
+
+1. Push repo ke GitHub
+2. Import repo di [vercel.com/new](https://vercel.com/new)
+3. Set **Root Directory** → `frontend`
+4. Set env var `NEXT_PUBLIC_API_URL` → URL backend production
+5. Deploy
+
+Backend deploy terpisah di Railway/Fly.io, lalu hubungkan URL-nya ke env var Vercel.
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Deskripsi |
 | :--- | :--- | :--- |
-| **Scan Fisik Pil & Kapsul** | Pemeriksaan warna, bentuk, dan tulisan timbul pada pil | Computer Vision (YOLOv8, FastSAM) |
-| **Transkrip Resep Dokter** | Membaca tulisan tangan di resep kertas | Handwritten OCR / Vision Language Models |
-| **Deteksi Interaksi Obat** | Penilaian keamanan kombinasi bahan aktif | NLP & Knowledge Graphs |
-| **Prediksi Penemuan Obat** | Simulasi penempelan molekul pada target protein | Deep Learning, Molecular Docking |
+| GET | `/api/health` | Health check |
+| GET | `/api/drugs` | List semua obat (support search & filter) |
+| GET | `/api/drugs/{id}` | Detail satu obat |
+| POST | `/api/drugs` | Tambah obat baru |
+| PUT | `/api/drugs/{id}` | Update obat |
+| DELETE | `/api/drugs/{id}` | Hapus obat |
 
 ---
 
-## 4. Catatan Batasan & Keselamatan
+## Fitur (Roadmap)
 
-1.  **Akurasi Visual** — Pemindaian AI dapat terkecoh oleh dua obat berbeda dengan ukuran, bentuk, dan warna yang persis sama.
-2.  **Verifikasi Medis** — Hasil analisis aplikasi konsumen tidak menggantikan keputusan medis profesional. Konfirmasi apoteker atau dokter tetap wajib sebelum mengonsumsi obat.
+- [ ] Identifikasi pil via foto (Computer Vision)
+- [ ] Transkrip resep dokter (OCR)
+- [ ] Cek interaksi obat (NLP)
+- [ ] Database obat Indonesia
+- [ ] Dashboard admin
 
 ---
 
