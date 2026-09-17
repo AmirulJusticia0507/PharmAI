@@ -1,0 +1,8 @@
+export default function AboutPage() {
+  return (
+    <main className="info-shell">
+      <nav className="site-nav"><div className="nav-inner"><a href="/" className="brand" aria-label="PharmAI beranda"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></a><div className="nav-links"><a href="/drugs">Database Obat</a><a href="/interactions">Interaksi</a><a href="/ocr">Resep</a></div><a href="/scan" className="nav-action">Mulai scan <span aria-hidden="true">↗</span></a></div></nav>
+      <section className="info-page"><span className="section-kicker">TENTANG PHARMAI</span><h1>Teknologi yang membuat<br /><em>informasi obat lebih dekat.</em></h1><p className="info-lead">PharmAI adalah platform analisis obat yang membantu Anda mengenali obat, memahami potensi interaksi, dan membaca resep dengan lebih mudah.</p><div className="info-grid"><article><span>01</span><h2>Jelas</h2><p>Kami menyajikan informasi yang ringkas dan mudah dipahami untuk membantu Anda memulai percakapan yang lebih baik dengan tenaga kesehatan.</p></article><article><span>02</span><h2>Bertanggung jawab</h2><p>AI kami adalah alat bantu informasi, bukan pengganti diagnosis, resep, atau konsultasi dari dokter dan apoteker.</p></article><article><span>03</span><h2>Terus berkembang</h2><p>PharmAI dibangun untuk berkembang bersama kebutuhan pengguna dan standar keamanan informasi kesehatan.</p></article></div><div className="info-callout"><strong>Keputusan kesehatan yang baik dimulai dari informasi yang dipahami.</strong><a href="/drugs">Jelajahi database obat <span aria-hidden="true">↗</span></a></div></section>
+    </main>
+  );
+}
