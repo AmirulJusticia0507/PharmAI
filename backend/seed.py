@@ -1,6 +1,35 @@
 from app.database import SessionLocal
 from app.models import Drug
 
+CATEGORY_IMAGES = {
+    "Analgesik & Antipiretik": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400",
+    "Antibiotik": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400",
+    "Antasida & PPI": "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400",
+    "Antihistamin": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400",
+    "Antidiabetes": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400",
+    "Antihypertensi": "https://images.unsplash.com/photo-1576091160557-1b3e6b3d6e3a?w=400",
+    "Bronkodilator": "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400",
+    "NSAID": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400",
+    "Elektrolit": "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=400",
+    "Suplemen": "https://images.unsplash.com/photo-1607619056574-7b8d2ee536b2?w=400",
+    "Kortikosteroid": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400",
+    "Penurun Kolesterol": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400",
+    "Diuretik": "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400",
+    "Antiemetik": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400",
+    "Antidiare": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400",
+    "Antijamur": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400",
+    "Antivirus": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400",
+    "Antiplatelet": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400",
+    "Antigout": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400",
+    "Mukolitik": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400",
+    "Ekspektoran": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400",
+    "Antiseptik": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400",
+}
+DEFAULT_IMAGE = "https://images.unsplash.com/photo-1550572017-edd951b55104?w=400"
+
+def get_image_for_category(category: str | None) -> str:
+    return CATEGORY_IMAGES.get(category or "", DEFAULT_IMAGE)
+
 drugs_data = [
     {
         "name": "Paracetamol 500mg",
@@ -690,7 +719,8 @@ def seed():
         added = 0
         for data in drugs_data:
             if data["name"] not in existing_names:
-                db.add(Drug(**data))
+                data_with_image = {**data, "image_url": get_image_for_category(data.get("category"))}
+                db.add(Drug(**data_with_image))
                 added += 1
         db.commit()
         print(f"Berhasil menambahkan {added} data obat baru.")
