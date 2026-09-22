@@ -46,11 +46,8 @@ export default function DrugsPage() {
   };
 
   const totalPages = Math.max(1, Math.ceil(resultCount / PAGE_SIZE));
-  const firstPageButton = Math.min(Math.max(page - 1, 1), Math.max(totalPages - 2, 1));
-  const pageButtons = Array.from(
-    { length: Math.min(3, totalPages) },
-    (_, index) => firstPageButton + index,
-  );
+  const nearbyPages = Array.from(new Set([page - 1, page, page + 1]))
+    .filter((number) => number > 1 && number <= totalPages);
   const goToPage = (pageNumber: number) => loadDrugs(activeSearch, pageNumber);
 
   return (
@@ -70,7 +67,7 @@ export default function DrugsPage() {
         <div className="catalog-toolbar"><span><strong>{loading ? "Memuat" : drugs.length}</strong> ditampilkan dari <strong>{resultCount.toLocaleString("id-ID")}</strong> hasil</span><span className="catalog-note"><i /> Informasi untuk referensi, bukan pengganti konsultasi medis</span></div>
 
         {error && <div className="drugs-error"><strong>Data belum dapat dimuat.</strong><span>{error}</span><button onClick={() => loadDrugs(search)}>Coba lagi</button></div>}
-        {loading ? <div className="drug-grid"><div className="drug-skeleton" /><div className="drug-skeleton" /><div className="drug-skeleton" /></div> : drugs.length === 0 ? <div className="empty-drugs"><span>⌁</span><h2>{activeSearch ? `Tidak ada obat untuk "${activeSearch}"` : "Belum ada data obat"}</h2><p>Coba kata kunci lain atau mulai dengan memindai obat.</p><a href="/scan" className="primary-action">Scan obat <span aria-hidden="true">↗</span></a></div> : <><div className="drug-grid">{drugs.map((drug) => <DrugCard key={drug.id} drug={drug} />)}</div><nav className="drug-pagination" aria-label="Navigasi halaman obat"><button type="button" onClick={() => goToPage(page - 1)} disabled={page === 1 || loading} aria-label="Halaman sebelumnya">←</button>{pageButtons.map((number) => <button type="button" key={number} onClick={() => goToPage(number)} className={number === page ? "active" : ""} aria-current={number === page ? "page" : undefined}>{number}</button>)}<button type="button" onClick={() => goToPage(page + 1)} disabled={page === totalPages || loading} aria-label="Halaman berikutnya">→</button><button type="button" className="pagination-last" onClick={() => goToPage(totalPages)} disabled={page === totalPages || loading}>Last</button></nav></>}
+        {loading ? <div className="drug-grid"><div className="drug-skeleton" /><div className="drug-skeleton" /><div className="drug-skeleton" /></div> : drugs.length === 0 ? <div className="empty-drugs"><span>⌁</span><h2>{activeSearch ? `Tidak ada obat untuk "${activeSearch}"` : "Belum ada data obat"}</h2><p>Coba kata kunci lain atau mulai dengan memindai obat.</p><a href="/scan" className="primary-action">Scan obat <span aria-hidden="true">↗</span></a></div> : <><div className="drug-grid">{drugs.map((drug) => <DrugCard key={drug.id} drug={drug} />)}</div><nav className="drug-pagination" aria-label="Navigasi halaman obat"><button type="button" onClick={() => goToPage(page - 1)} disabled={page === 1 || loading} aria-label="Halaman sebelumnya">←</button><button type="button" onClick={() => goToPage(1)} className={page === 1 ? "active" : ""} aria-current={page === 1 ? "page" : undefined}>1</button>{page > 3 && <span className="pagination-gap">…</span>}{nearbyPages.map((number) => <button type="button" key={number} onClick={() => goToPage(number)} className={number === page ? "active" : ""} aria-current={number === page ? "page" : undefined}>{number}</button>)}<button type="button" onClick={() => goToPage(page + 1)} disabled={page === totalPages || loading} aria-label="Halaman berikutnya">→</button><button type="button" className="pagination-last" onClick={() => goToPage(totalPages)} disabled={page === totalPages || loading}>Last</button></nav></>}
       </section>
     </main>
   );

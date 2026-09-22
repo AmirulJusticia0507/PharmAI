@@ -162,6 +162,8 @@ def list_drugs(
         regulatory_source_url = Column(String(1000))
         regulatory_checked_at = Column(DateTime)
         regulatory_notes = Column(Text)
+        source_product_id = Column(String(100))
+        source_application_id = Column(String(50))
         created_at = Column(DateTime)
         updated_at = Column(DateTime)
 
@@ -182,6 +184,8 @@ def list_drugs(
                 "regulatory_source_url": d.regulatory_source_url,
                 "regulatory_checked_at": d.regulatory_checked_at,
                 "regulatory_notes": d.regulatory_notes,
+                "source_product_id": d.source_product_id,
+                "source_application_id": d.source_application_id,
             }
             for d in drugs
         ]
@@ -232,6 +236,8 @@ def get_drug(drug_id: int):
         regulatory_source_url = Column(String(1000))
         regulatory_checked_at = Column(DateTime)
         regulatory_notes = Column(Text)
+        source_product_id = Column(String(100))
+        source_application_id = Column(String(50))
         created_at = Column(DateTime)
         updated_at = Column(DateTime)
 
@@ -250,4 +256,6 @@ def get_drug(drug_id: int):
             "regulatory_source_url": drug.regulatory_source_url,
             "regulatory_checked_at": drug.regulatory_checked_at,
             "regulatory_notes": drug.regulatory_notes,
+            "source_product_id": drug.source_product_id,
+            "source_application_id": drug.source_application_id,
         }

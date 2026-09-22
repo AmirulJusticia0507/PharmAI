@@ -17,6 +17,8 @@ class DrugBase(BaseModel):
     regulatory_source_url: str | None = None
     regulatory_checked_at: datetime | None = None
     regulatory_notes: str | None = None
+    source_product_id: str | None = None
+    source_application_id: str | None = None
 
 
 class DrugCreate(DrugBase):

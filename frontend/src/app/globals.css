@@ -1209,6 +1209,13 @@
     padding: 0 13px;
 }
 
+.pagination-gap {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    color: #738078;
+}
+
 .drug-card {
     display: block;
     position: relative;

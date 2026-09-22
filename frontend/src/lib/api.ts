@@ -16,6 +16,8 @@ export interface Drug {
   regulatory_source_url: string | null;
   regulatory_checked_at: string | null;
   regulatory_notes: string | null;
+  source_product_id: string | null;
+  source_application_id: string | null;
   created_at: string;
   updated_at: string;
 }

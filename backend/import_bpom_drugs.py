@@ -77,27 +77,44 @@ def map_product(row: dict, checked_at: datetime) -> dict:
         "regulatory_source_url": BPOM_DETAIL_URL.format(product_id=product_id, application_id=application_id),
         "regulatory_checked_at": checked_at,
         "regulatory_notes": f"Status katalog resmi BPOM: {clean(row.get('STATUS')) or 'belum tersedia'}.",
+        "source_product_id": product_id,
+        "source_application_id": application_id,
     }
 
 
 def upsert_batch(rows: list[dict]) -> tuple[int, int]:
     valid = [row for row in rows if row["registration_number"]]
     numbers = [row["registration_number"] for row in valid]
+    product_ids = [row["source_product_id"] for row in valid]
     inserted = updated = 0
     with SessionLocal() as db:
-        existing = {
+        existing_by_source = {
+            (drug.source_product_id, drug.source_application_id): drug
+            for drug in db.scalars(select(Drug).where(Drug.source_product_id.in_(product_ids)))
+        }
+        legacy_by_number = {
             drug.registration_number: drug
-            for drug in db.scalars(select(Drug).where(Drug.registration_number.in_(numbers)))
+            for drug in db.scalars(
+                select(Drug).where(
+                    Drug.registration_number.in_(numbers),
+                    Drug.source_product_id.is_(None),
+                )
+            )
         }
         for values in valid:
-            drug = existing.get(values["registration_number"])
+            source_key = (values["source_product_id"], values["source_application_id"])
+            drug = existing_by_source.get(source_key)
+            if not drug:
+                drug = legacy_by_number.pop(values["registration_number"], None)
             if drug:
                 for key, value in values.items():
                     setattr(drug, key, value)
                 updated += 1
             else:
-                db.add(Drug(**values))
+                drug = Drug(**values)
+                db.add(drug)
                 inserted += 1
+            existing_by_source[source_key] = drug
         db.commit()
     return inserted, updated
 
