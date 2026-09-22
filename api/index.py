@@ -133,12 +133,18 @@ async def check_interactions(req: InteractionRequest):
         return {"error": "Minimal 2 obat untuk cek interaksi"}
     drugs_str = ", ".join(req.drug_names)
     messages = [
-        {"role": "system", "content": "You are a pharmaceutical expert. Always return valid JSON."},
+        {"role": "system", "content": (
+            "Anda adalah pakar farmasi. Seluruh penjelasan, rekomendasi, dan ringkasan "
+            "wajib menggunakan Bahasa Indonesia yang mudah dipahami. Selalu kembalikan JSON valid."
+        )},
         {"role": "user", "content": (
-            f"Check interactions between: {drugs_str}. Return JSON: "
+            f"Periksa interaksi antara obat berikut: {drugs_str}. Kembalikan JSON: "
             '{"interactions":[{"drugs":["A","B"],"severity":"high/medium/low",'
-            '"description":"explanation","recommendation":"what to do"}],'
-            '"overall_safety":"safe/caution/unsafe","summary":"brief summary"}.'
+            '"description":"penjelasan dalam Bahasa Indonesia",'
+            '"recommendation":"tindakan yang disarankan dalam Bahasa Indonesia"}],'
+            '"overall_safety":"safe/caution/unsafe",'
+            '"summary":"ringkasan singkat dalam Bahasa Indonesia"}. '
+            "Jangan terjemahkan nama obat atau nilai severity dan overall_safety."
         )},
     ]
     result = await chat_completion(messages)

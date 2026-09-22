@@ -116,19 +116,22 @@ async def check_drug_interactions(drug_names: list[str]) -> dict:
         {
             "role": "system",
             "content": (
-                "You are a pharmaceutical expert. Analyze drug interactions. "
-                "Always return valid JSON."
+                "Anda adalah pakar farmasi. Analisis interaksi obat. Seluruh penjelasan, "
+                "rekomendasi, dan ringkasan wajib menggunakan Bahasa Indonesia yang mudah "
+                "dipahami. Selalu kembalikan JSON valid."
             ),
         },
         {
             "role": "user",
             "content": (
-                f"Check interactions between these drugs: {drugs_str}. "
-                "Return JSON: "
+                f"Periksa interaksi antara obat berikut: {drugs_str}. "
+                "Kembalikan JSON: "
                 '{"interactions": [{"drugs": ["A", "B"], "severity": "high/medium/low", '
-                '"description": "explanation", "recommendation": "what to do"}], '
+                '"description": "penjelasan dalam Bahasa Indonesia", '
+                '"recommendation": "tindakan yang disarankan dalam Bahasa Indonesia"}], '
                 '"overall_safety": "safe/caution/unsafe", '
-                '"summary": "brief summary"}.'
+                '"summary": "ringkasan singkat dalam Bahasa Indonesia"}. '
+                "Jangan terjemahkan nama obat atau nilai severity dan overall_safety."
             ),
         },
     ]
