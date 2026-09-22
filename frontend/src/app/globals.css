@@ -1347,6 +1347,7 @@ html[data-theme="dark"] :is(
     .drug-generic,
     .drug-details span,
     .drug-description,
+    .drug-id,
     .drug-card-footer,
     .drug-detail-hero p,
     .drug-detail-content section > p,
@@ -1750,6 +1751,19 @@ html[data-theme="dark"] input {
     text-align: right;
 }
 
+.drug-card-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.drug-id {
+    color: #8b9991;
+    font: 700 9px Arial, sans-serif;
+    letter-spacing: 1px;
+}
+
 .drug-card h2 {
     margin: 25px 0 4px;
     color: var(--fg);
@@ -1802,7 +1816,7 @@ html[data-theme="dark"] input {
     bottom: 18px;
     left: 23px;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     color: #a0aba4;
     font: 9px Arial, sans-serif;
     letter-spacing: 1px;
