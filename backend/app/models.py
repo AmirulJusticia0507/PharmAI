@@ -10,7 +10,7 @@ class Drug(Base):
     generic_name = Column(String(255), nullable=True)
     category = Column(String(100), nullable=True)
     description = Column(Text, nullable=True)
-    dosage_form = Column(String(100), nullable=True)
+    dosage_form = Column(String(500), nullable=True)
     manufacturer = Column(String(255), nullable=True)
     image_url = Column(String(500), nullable=True)
     active_ingredients = Column(JSON, nullable=False, default=list)

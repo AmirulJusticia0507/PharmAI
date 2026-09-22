@@ -105,6 +105,7 @@ def upsert_batch(rows: list[dict]) -> tuple[int, int]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Sinkronisasi produk obat resmi BPOM ke PharmAI")
     parser.add_argument("--limit", type=int, default=0, help="Batasi jumlah data; 0 berarti seluruh data")
+    parser.add_argument("--start", type=int, default=0, help="Mulai dari offset katalog BPOM")
     parser.add_argument("--batch-size", type=int, default=500)
     parser.add_argument("--delay", type=float, default=0.25)
     parser.add_argument("--dry-run", action="store_true")
@@ -121,14 +122,18 @@ def main() -> None:
         token = match.group(1)
         first = fetch_page(client, token, 0, min(args.batch_size, args.limit or args.batch_size))
         available = int(first.get("recordsFiltered") or first.get("recordsTotal") or 0)
-        target = min(available, args.limit) if args.limit else available
-        print(f"BPOM tersedia: {available}; target: {target}; dry_run: {args.dry_run}")
+        start_at = max(0, min(args.start, available))
+        remaining = available - start_at
+        target = min(remaining, args.limit) if args.limit else remaining
+        print(
+            f"BPOM tersedia: {available}; mulai: {start_at}; target proses: {target}; "
+            f"dry_run: {args.dry_run}"
+        )
 
-        start = 0
-        payload = first
-        while start < target:
-            if start:
-                payload = fetch_page(client, token, start, min(args.batch_size, target - start))
+        start = start_at
+        while totals["seen"] < target:
+            length = min(args.batch_size, target - totals["seen"])
+            payload = first if start == 0 and length == len(first.get("data", [])) else fetch_page(client, token, start, length)
             mapped = [map_product(row, checked_at) for row in payload.get("data", [])]
             mapped = mapped[: target - totals["seen"]]
             if not mapped:
@@ -143,7 +148,7 @@ def main() -> None:
                 f"diperbarui: {totals['updated']}"
             )
             start += len(mapped)
-            if start < target:
+            if totals["seen"] < target:
                 time.sleep(max(args.delay, 0))
 
     print(f"Selesai: {totals}")
