@@ -35,16 +35,16 @@ async def analyze_pill_image(image_bytes: bytes, mime: str = "image/jpeg") -> di
                 {
                     "type": "text",
                     "text": (
-                        "Analyze this pill/capsule image. Return JSON with: "
-                        '{"name": "drug name", "dosage": "dosage", '
-                        '"category": "drug category", '
-                        '"active_ingredients": ["ingredient name"], '
-                        '"registration_number": "number visible on package or empty", '
-                        '"description": "brief description", '
+                        "Analisis foto pil, kapsul, atau kemasan obat ini. Kembalikan JSON: "
+                        '{"name": "nama obat", "dosage": "dosis", '
+                        '"category": "kategori dalam Bahasa Indonesia", '
+                        '"active_ingredients": ["nama zat aktif"], '
+                        '"registration_number": "nomor yang terlihat pada kemasan atau kosong", '
+                        '"description": "deskripsi singkat dalam Bahasa Indonesia", '
                         '"confidence": 0.0-1.0}. '
-                        "Do not invent ingredients or a registration number. If they are not "
-                        "clearly visible, return an empty list or empty string. If unsure, set "
-                        "confidence low. Only return valid JSON."
+                        "Pertahankan nama obat, dosis, dan zat aktif sebagaimana tertulis. Jangan "
+                        "mengarang kandungan atau nomor izin edar. Jika tidak terlihat jelas, gunakan "
+                        "nilai kosong dan confidence rendah. Hanya kembalikan JSON valid."
                     ),
                 },
                 {
@@ -83,12 +83,13 @@ async def ocr_prescription(image_bytes: bytes, mime: str = "image/jpeg") -> dict
                 {
                     "type": "text",
                     "text": (
-                        "Read and transcribe this handwritten doctor prescription. "
-                        "Return JSON with: "
+                        "Baca dan transkripsikan resep dokter ini. Kembalikan JSON: "
                         '{"patient_name": "", "doctor_name": "", '
                         '"medications": [{"name": "", "dosage": "", "frequency": "", "duration": ""}], '
                         '"notes": ""}. '
-                        "Only return valid JSON."
+                        "Pertahankan nama pasien, dokter, obat, dosis, dan teks asli yang terbaca. "
+                        "Tulis frequency, duration, dan notes dalam Bahasa Indonesia. Jangan menebak "
+                        "tulisan yang tidak terbaca; gunakan nilai kosong. Hanya kembalikan JSON valid."
                     ),
                 },
                 {
