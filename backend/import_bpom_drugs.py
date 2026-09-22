@@ -36,23 +36,31 @@ def parse_date(value):
 
 
 def fetch_page(client: httpx.Client, token: str, start: int, length: int) -> dict:
-    response = client.post(
-        BPOM_DATA_URL,
-        data={
-            "draw": start // length + 1,
-            "start": start,
-            "length": length,
-            "search[value]": "",
-            "search[regex]": "false",
-        },
-        headers={
-            "X-CSRF-TOKEN": token,
-            "X-Requested-With": "XMLHttpRequest",
-            "Referer": BPOM_LIST_URL,
-        },
-    )
-    response.raise_for_status()
-    return response.json()
+    for attempt in range(1, 6):
+        try:
+            response = client.post(
+                BPOM_DATA_URL,
+                data={
+                    "draw": start // length + 1,
+                    "start": start,
+                    "length": length,
+                    "search[value]": "",
+                    "search[regex]": "false",
+                },
+                headers={
+                    "X-CSRF-TOKEN": token,
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Referer": BPOM_LIST_URL,
+                },
+            )
+            response.raise_for_status()
+            return response.json()
+        except (httpx.HTTPStatusError, httpx.RequestError):
+            if attempt == 5:
+                raise
+            wait = attempt * 3
+            print(f"BPOM gagal pada offset {start}; mencoba lagi dalam {wait} detik ({attempt}/5)")
+            time.sleep(wait)
 
 
 def map_product(row: dict, checked_at: datetime) -> dict:
