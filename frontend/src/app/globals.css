@@ -2,6 +2,7 @@
 @import "tailwindcss/utilities";
 @layer base {
      :root {
+        color-scheme: light;
         --bg: #f4f6f2;
         --fg: #11231d;
         --muted: #687771;
@@ -1202,6 +1203,246 @@
     color: #abb6af;
     cursor: not-allowed;
     opacity: .65;
+}
+
+.theme-toggle {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    color: var(--accent-foreground);
+    background: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    box-shadow: 0 8px 24px rgba(17, 35, 29, .2);
+    font: 20px/1 Arial, sans-serif;
+    transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px);
+}
+
+.theme-toggle:focus-visible {
+    outline: 3px solid #9fbd43;
+    outline-offset: 3px;
+}
+
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #101714;
+    --fg: #edf3ef;
+    --muted: #a9b7af;
+    --accent: #9fbd43;
+    --accent-foreground: #101714;
+    --card: #18211d;
+    --border: #34443c;
+}
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] .pharma-shell,
+html[data-theme="dark"] .scan-shell,
+html[data-theme="dark"] .drugs-shell,
+html[data-theme="dark"] .interaction-shell,
+html[data-theme="dark"] .ocr-shell,
+html[data-theme="dark"] .info-shell {
+    background: var(--bg);
+    color: var(--fg);
+}
+
+html[data-theme="dark"] .site-nav,
+html[data-theme="dark"] .site-footer,
+html[data-theme="dark"] .drug-detail-hero,
+html[data-theme="dark"] .drug-detail-content dl div,
+html[data-theme="dark"] .result-line,
+html[data-theme="dark"] .prescription-meta,
+html[data-theme="dark"] .medication-row,
+html[data-theme="dark"] .ocr-note,
+html[data-theme="dark"] .raw-prescription,
+html[data-theme="dark"] .result-list-heading,
+html[data-theme="dark"] .recommendation {
+    border-color: var(--border);
+}
+
+html[data-theme="dark"] :is(
+    .scan-card,
+    .feature-card,
+    .upload-zone,
+    .preview-panel,
+    .result-column,
+    .drug-search,
+    .drug-card,
+    .interaction-form,
+    .interaction-result,
+    .interaction-item,
+    .ocr-upload,
+    .ocr-preview-panel,
+    .ocr-result-column,
+    .info-grid article,
+    .faq-list details,
+    .regulatory-source
+) {
+    color: var(--fg);
+    background: var(--card);
+    border-color: var(--border);
+    box-shadow: none;
+}
+
+html[data-theme="dark"] :is(.scan-tips, .interaction-aside, .ocr-tips) {
+    color: var(--fg);
+    background: #263526;
+    border-color: #40523b;
+}
+
+html[data-theme="dark"] :is(.drug-input-row, .raw-prescription p, .preview-panel img, .ocr-preview-panel img) {
+    color: var(--fg);
+    background: #111916;
+    border-color: var(--border);
+}
+
+html[data-theme="dark"] :is(.autocomplete-dropdown, .autocomplete-item, .floating-note) {
+    color: var(--fg);
+    background: var(--card);
+    border-color: var(--border);
+}
+
+html[data-theme="dark"] :is(.autocomplete-item:hover, .autocomplete-item.highlighted) {
+    background: #26332d;
+}
+
+html[data-theme="dark"] :is(.autocomplete-name, .autocomplete-meta) {
+    color: var(--fg);
+}
+
+html[data-theme="dark"] .drug-skeleton,
+html[data-theme="dark"] .drug-detail-loading div {
+    background: linear-gradient(100deg, #18211d 30%, #26332d 50%, #18211d 70%);
+    background-size: 200% 100%;
+}
+
+html[data-theme="dark"] .drug-input-row:focus-within,
+html[data-theme="dark"] :is(.camera-action, .reset-action):hover {
+    background: #202c27;
+}
+
+html[data-theme="dark"] :is(
+    .nav-links,
+    .hero-description,
+    .trust-line,
+    .scan-heading p,
+    .scan-step small,
+    .upload-zone > p,
+    .upload-meta,
+    .tip-list p,
+    .preview-label,
+    .scan-ready p,
+    .result-card > p,
+    .drugs-heading p,
+    .catalog-toolbar,
+    .drug-generic,
+    .drug-details span,
+    .drug-description,
+    .drug-card-footer,
+    .drug-detail-hero p,
+    .drug-detail-content section > p,
+    .regulatory-source p,
+    .scan-verification-note,
+    .interaction-heading p,
+    .form-helper,
+    .interaction-steps p,
+    .medical-note,
+    .result-overview p,
+    .interaction-item > p,
+    .recommendation p,
+    .ocr-heading p,
+    .ocr-upload > p,
+    .ocr-ready p,
+    .prescription-meta span,
+    .medication-row p,
+    .ocr-note p,
+    .raw-prescription p,
+    .info-lead,
+    .info-grid p,
+    .legal-sections p,
+    .faq-list p,
+    .footer-links a,
+    .site-footer > span
+) {
+    color: var(--muted);
+}
+
+html[data-theme="dark"] :is(.camera-action, .reset-action, .drug-pagination button) {
+    color: var(--fg);
+    background: var(--card);
+    border-color: var(--border);
+}
+
+html[data-theme="dark"] .drug-pagination button:disabled {
+    color: #718078;
+}
+
+html[data-theme="dark"] .interaction-result.safety-caution {
+    background: #292417;
+}
+
+html[data-theme="dark"] .interaction-result.safety-unsafe,
+html[data-theme="dark"] .drugs-error,
+html[data-theme="dark"] .interaction-error {
+    background: #2c1d19;
+}
+
+html[data-theme="dark"] :is(.registration-status, .registration-status.status-active) {
+    color: #dcebd9;
+    background: #233326;
+}
+
+html[data-theme="dark"] :is(.registration-status.status-expired, .registration-status.status-revoked, .registration-status.status-not_found) {
+    color: #f0c4bb;
+    background: #3a211d;
+}
+
+html[data-theme="dark"] .upload-orbit {
+    color: #101714;
+    box-shadow: 0 0 0 12px #263526, 0 0 0 13px #41533d;
+}
+
+html[data-theme="dark"] .ocr-paper-icon {
+    color: #dce9b1;
+    background: #314127;
+    border-color: #52683e;
+    box-shadow: 10px 10px 0 #202b20;
+}
+
+html[data-theme="dark"] .primary-action,
+html[data-theme="dark"] .nav-action:hover,
+html[data-theme="dark"] .scan-nav-active,
+html[data-theme="dark"] .drug-search button,
+html[data-theme="dark"] .info-callout {
+    color: #101714;
+    background: var(--accent);
+}
+
+html[data-theme="dark"] .nav-action {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+html[data-theme="dark"] input {
+    caret-color: var(--accent);
+}
+
+@media (max-width: 600px) {
+    .theme-toggle {
+        right: 14px;
+        bottom: 14px;
+        width: 42px;
+        height: 42px;
+    }
 }
 
 .drug-pagination button.pagination-last {
