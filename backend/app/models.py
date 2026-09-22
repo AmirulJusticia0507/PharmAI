@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, func
+from sqlalchemy import JSON, Column, Date, Integer, String, Text, DateTime, func
 from .database import Base
 
 
@@ -13,6 +13,13 @@ class Drug(Base):
     dosage_form = Column(String(100), nullable=True)
     manufacturer = Column(String(255), nullable=True)
     image_url = Column(String(500), nullable=True)
+    active_ingredients = Column(JSON, nullable=False, default=list)
+    registration_number = Column(String(100), nullable=True, index=True)
+    registration_status = Column(String(30), nullable=False, default="unverified")
+    registration_expires_at = Column(Date, nullable=True)
+    regulatory_source_url = Column(String(1000), nullable=True)
+    regulatory_checked_at = Column(DateTime(timezone=True), nullable=True)
+    regulatory_notes = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

@@ -1347,6 +1347,67 @@
     font: 12px/1.55 Arial, sans-serif;
 }
 
+.registration-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 9px;
+  border: 1px solid #c8c5bc;
+  background: #f1efe8;
+  color: #3f403b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.registration-status.status-active {
+  border-color: #71916d;
+  background: #e5f0e2;
+  color: #294e29;
+}
+
+.registration-status.status-expired,
+.registration-status.status-revoked,
+.registration-status.status-not_found {
+  border-color: #b96a5e;
+  background: #f6e3df;
+  color: #7a2e25;
+}
+
+.regulatory-source {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 28px;
+  border: 1px solid #cbc8bd;
+  background: #f3f1e9;
+}
+
+.regulatory-source h2 {
+  margin: 8px 0;
+  font-size: 24px;
+}
+
+.regulatory-source p {
+  max-width: 680px;
+  margin: 0 0 8px;
+  color: #55564f;
+}
+
+.scan-verification-note {
+  display: block;
+  margin-top: 14px;
+  color: #67685f;
+  line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+  .regulatory-source {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
 .drug-detail-loading {
     display: grid;
     gap: 18px;

@@ -9,6 +9,13 @@ export interface Drug {
   dosage_form: string | null;
   manufacturer: string | null;
   image_url: string | null;
+  active_ingredients: string[];
+  registration_number: string | null;
+  registration_status: string;
+  registration_expires_at: string | null;
+  regulatory_source_url: string | null;
+  regulatory_checked_at: string | null;
+  regulatory_notes: string | null;
   created_at: string;
   updated_at: string;
 }

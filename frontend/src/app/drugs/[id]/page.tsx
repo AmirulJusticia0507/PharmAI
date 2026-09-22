@@ -9,6 +9,13 @@ export default function DrugDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [drug, setDrug] = useState<Drug | null>(null);
   const [error, setError] = useState(false);
+  const statusLabel: Record<string, string> = {
+    active: "Izin aktif",
+    expired: "Izin kedaluwarsa",
+    revoked: "Izin dicabut",
+    not_found: "Tidak ditemukan",
+    unverified: "Belum diverifikasi",
+  };
 
   useEffect(() => {
     fetchDrug(Number(id)).then(setDrug).catch(() => setError(true));
@@ -38,8 +45,17 @@ export default function DrugDetailPage() {
                 <div><dt>Bentuk sediaan</dt><dd>{drug.dosage_form || "Belum tersedia"}</dd></div>
                 <div><dt>Produsen</dt><dd>{drug.manufacturer || "Belum tersedia"}</dd></div>
                 <div><dt>Nama generik</dt><dd>{drug.generic_name || "Belum tersedia"}</dd></div>
+                <div><dt>Zat aktif</dt><dd>{drug.active_ingredients?.join(", ") || "Belum tersedia"}</dd></div>
+                <div><dt>Nomor izin edar</dt><dd>{drug.registration_number || "Belum tersedia"}</dd></div>
+                <div><dt>Status registrasi</dt><dd><span className={`registration-status status-${drug.registration_status}`}>{statusLabel[drug.registration_status] || drug.registration_status}</span></dd></div>
+                <div><dt>Berlaku sampai</dt><dd>{drug.registration_expires_at ? new Date(drug.registration_expires_at).toLocaleDateString("id-ID") : "Belum tersedia"}</dd></div>
               </dl>
             </div>
+
+            <section className="regulatory-source">
+              <div><span className="section-kicker">VERIFIKASI REGULASI</span><h2>Sumber pemeriksaan BPOM</h2><p>{drug.regulatory_notes || "Produk ini belum diverifikasi terhadap data registrasi resmi BPOM."}</p>{drug.regulatory_checked_at && <small>Terakhir diperiksa {new Date(drug.regulatory_checked_at).toLocaleString("id-ID")}</small>}</div>
+              <a href={drug.regulatory_source_url || "https://cekbpom.pom.go.id/"} target="_blank" rel="noreferrer" className="primary-action">Cek di BPOM <span aria-hidden="true">↗</span></a>
+            </section>
 
             <aside className="drug-detail-note"><strong>Gunakan sebagai referensi informasi.</strong><p>Informasi ini bukan pengganti diagnosis, resep, atau konsultasi dari dokter dan apoteker.</p></aside>
           </article>

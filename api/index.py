@@ -58,7 +58,10 @@ async def scan_pill(file: UploadFile = File(...)):
                 {"type": "text", "text": (
                     "Analyze this pill/capsule image. Return JSON: "
                     '{"name":"drug name","dosage":"dosage","category":"category",'
-                    '"description":"brief description","confidence":0.0-1.0}. Only valid JSON.'
+                    '"active_ingredients":["ingredient name"],'
+                    '"registration_number":"number visible on package or empty",'
+                    '"description":"brief description","confidence":0.0-1.0}. '
+                    "Do not invent ingredients or a registration number. Only valid JSON."
                 )},
                 {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
             ],
@@ -68,7 +71,10 @@ async def scan_pill(file: UploadFile = File(...)):
     try:
         return parse_json_response(result)
     except Exception:
-        return {"name": "Unknown", "description": result, "confidence": 0.0}
+        return {
+            "name": "Unknown", "description": result,
+            "active_ingredients": [], "registration_number": "", "confidence": 0.0,
+        }
 
 
 @app.post("/api/ai/ocr-prescription")
@@ -137,7 +143,7 @@ def list_drugs(
     class Base(DeclarativeBase):
         pass
 
-    from sqlalchemy import Column, Integer, String, Text, DateTime, func
+    from sqlalchemy import JSON, Column, Date, Integer, String, Text, DateTime
 
     class Drug(Base):
         __tablename__ = "drugs"
@@ -149,6 +155,13 @@ def list_drugs(
         dosage_form = Column(String(100))
         manufacturer = Column(String(255))
         image_url = Column(String(500))
+        active_ingredients = Column(JSON)
+        registration_number = Column(String(100))
+        registration_status = Column(String(30))
+        registration_expires_at = Column(Date)
+        regulatory_source_url = Column(String(1000))
+        regulatory_checked_at = Column(DateTime)
+        regulatory_notes = Column(Text)
         created_at = Column(DateTime)
         updated_at = Column(DateTime)
 
@@ -162,7 +175,13 @@ def list_drugs(
                 "id": d.id, "name": d.name, "generic_name": d.generic_name,
                 "category": d.category, "description": d.description,
                 "dosage_form": d.dosage_form, "manufacturer": d.manufacturer,
-                "image_url": d.image_url,
+                "image_url": d.image_url, "active_ingredients": d.active_ingredients or [],
+                "registration_number": d.registration_number,
+                "registration_status": d.registration_status or "unverified",
+                "registration_expires_at": d.registration_expires_at,
+                "regulatory_source_url": d.regulatory_source_url,
+                "regulatory_checked_at": d.regulatory_checked_at,
+                "regulatory_notes": d.regulatory_notes,
             }
             for d in drugs
         ]
@@ -170,7 +189,7 @@ def list_drugs(
 
 @app.get("/api/drugs/{drug_id}")
 def get_drug(drug_id: int):
-    from sqlalchemy import Column, DateTime, Integer, String, Text, create_engine
+    from sqlalchemy import JSON, Column, Date, DateTime, Integer, String, Text, create_engine
     from sqlalchemy.orm import DeclarativeBase, Session
 
     database_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/pharmaidb")
@@ -189,6 +208,13 @@ def get_drug(drug_id: int):
         dosage_form = Column(String(100))
         manufacturer = Column(String(255))
         image_url = Column(String(500))
+        active_ingredients = Column(JSON)
+        registration_number = Column(String(100))
+        registration_status = Column(String(30))
+        registration_expires_at = Column(Date)
+        regulatory_source_url = Column(String(1000))
+        regulatory_checked_at = Column(DateTime)
+        regulatory_notes = Column(Text)
         created_at = Column(DateTime)
         updated_at = Column(DateTime)
 
@@ -200,5 +226,11 @@ def get_drug(drug_id: int):
             "id": drug.id, "name": drug.name, "generic_name": drug.generic_name,
             "category": drug.category, "description": drug.description,
             "dosage_form": drug.dosage_form, "manufacturer": drug.manufacturer,
-            "image_url": drug.image_url,
+            "image_url": drug.image_url, "active_ingredients": drug.active_ingredients or [],
+            "registration_number": drug.registration_number,
+            "registration_status": drug.registration_status or "unverified",
+            "registration_expires_at": drug.registration_expires_at,
+            "regulatory_source_url": drug.regulatory_source_url,
+            "regulatory_checked_at": drug.regulatory_checked_at,
+            "regulatory_notes": drug.regulatory_notes,
         }

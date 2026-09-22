@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from datetime import datetime
+from pydantic import BaseModel, Field
+from datetime import date, datetime
 
 
 class DrugBase(BaseModel):
@@ -10,6 +10,13 @@ class DrugBase(BaseModel):
     dosage_form: str | None = None
     manufacturer: str | None = None
     image_url: str | None = None
+    active_ingredients: list[str] = Field(default_factory=list)
+    registration_number: str | None = None
+    registration_status: str = "unverified"
+    registration_expires_at: date | None = None
+    regulatory_source_url: str | None = None
+    regulatory_checked_at: datetime | None = None
+    regulatory_notes: str | None = None
 
 
 class DrugCreate(DrugBase):

@@ -6,6 +6,8 @@ interface ScanResult {
   name: string;
   dosage: string;
   category: string;
+  active_ingredients: string[];
+  registration_number: string;
   description: string;
   confidence: number;
 }
@@ -56,6 +58,8 @@ export default function ScanPage() {
         name: "Gagal mengenali",
         dosage: "",
         category: "",
+        active_ingredients: [],
+        registration_number: "",
         description: "Terjadi kesalahan. Coba foto dengan pencahayaan lebih baik.",
         confidence: 0,
       });
@@ -107,7 +111,7 @@ export default function ScanPage() {
             <div className="preview-panel"><div className="preview-label"><span>FOTO SIAP DIANALISIS</span><button onClick={handleReset} aria-label="Hapus foto">✕</button></div><img src={preview} alt="Preview pil" /></div>
             <div className="result-column">
               {!result && <div className="scan-ready"><span className="section-kicker">LANGKAH BERIKUTNYA</span><h2>Foto Anda sudah siap.</h2><p>Biarkan PharmAI membaca bentuk, warna, dan karakteristik obat ini.</p><button onClick={handleScan} disabled={scanning} className="primary-action scan-submit">{scanning ? "Memindai dengan AI..." : "Mulai analisis AI"}<span aria-hidden="true">→</span></button><button onClick={handleReset} className="reset-action">Pilih foto lain</button></div>}
-              {result && <div className="result-card"><div className="result-card-top"><span className="section-kicker">HASIL IDENTIFIKASI</span>{result.confidence > 0 && <span className="confidence-badge">{Math.round(result.confidence * 100)}% yakin</span>}</div><h2>{result.name}</h2>{result.dosage && <div className="result-line"><span>DOSIS</span><strong>{result.dosage}</strong></div>}{result.category && <div className="result-line"><span>KATEGORI</span><strong>{result.category}</strong></div>}<p>{result.description}</p><div className="result-actions"><button onClick={handleReset} className="reset-action">Scan lagi</button><a href="/drugs" className="primary-action">Lihat database <span aria-hidden="true">↗</span></a></div></div>}
+              {result && <div className="result-card"><div className="result-card-top"><span className="section-kicker">HASIL IDENTIFIKASI</span>{result.confidence > 0 && <span className="confidence-badge">{Math.round(result.confidence * 100)}% yakin</span>}</div><h2>{result.name}</h2>{result.dosage && <div className="result-line"><span>DOSIS</span><strong>{result.dosage}</strong></div>}{result.category && <div className="result-line"><span>KATEGORI</span><strong>{result.category}</strong></div>}{result.active_ingredients?.length > 0 && <div className="result-line"><span>ZAT AKTIF</span><strong>{result.active_ingredients.join(", ")}</strong></div>}{result.registration_number && <div className="result-line"><span>NOMOR IZIN TERBACA</span><strong>{result.registration_number}</strong></div>}<p>{result.description}</p><small className="scan-verification-note">Identifikasi gambar belum membuktikan izin edar. Cocokkan nomor dan komposisi dengan sumber resmi BPOM.</small><div className="result-actions"><button onClick={handleReset} className="reset-action">Scan lagi</button><a href="/drugs" className="primary-action">Lihat database <span aria-hidden="true">↗</span></a></div></div>}
             </div>
           </div>
         )}

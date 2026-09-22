@@ -37,9 +37,13 @@ async def analyze_pill_image(image_bytes: bytes, mime: str = "image/jpeg") -> di
                         "Analyze this pill/capsule image. Return JSON with: "
                         '{"name": "drug name", "dosage": "dosage", '
                         '"category": "drug category", '
+                        '"active_ingredients": ["ingredient name"], '
+                        '"registration_number": "number visible on package or empty", '
                         '"description": "brief description", '
                         '"confidence": 0.0-1.0}. '
-                        "If unsure, set confidence low. Only return valid JSON."
+                        "Do not invent ingredients or a registration number. If they are not "
+                        "clearly visible, return an empty list or empty string. If unsure, set "
+                        "confidence low. Only return valid JSON."
                     ),
                 },
                 {
@@ -62,6 +66,8 @@ async def analyze_pill_image(image_bytes: bytes, mime: str = "image/jpeg") -> di
             "name": "Unknown",
             "dosage": "",
             "category": "",
+            "active_ingredients": [],
+            "registration_number": "",
             "description": result,
             "confidence": 0.0,
         }
