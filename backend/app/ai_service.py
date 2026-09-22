@@ -7,9 +7,10 @@ load_dotenv()
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+AI_MODEL = os.getenv("AI_MODEL", "openai/gpt-4o-mini")
 
 
-async def chat_completion(messages: list[dict], model: str = "openai/gpt-3.5-turbo") -> str:
+async def chat_completion(messages: list[dict], model: str | None = None) -> str:
     async with httpx.AsyncClient(timeout=60) as client:
         resp = await client.post(
             f"{OPENROUTER_BASE_URL}/chat/completions",
@@ -19,7 +20,7 @@ async def chat_completion(messages: list[dict], model: str = "openai/gpt-3.5-tur
                 "HTTP-Referer": "http://localhost:8000",
                 "X-Title": "PharmAI",
             },
-            json={"model": model, "messages": messages, "max_tokens": 1024},
+            json={"model": model or AI_MODEL, "messages": messages, "max_tokens": 1024},
         )
         resp.raise_for_status()
         return resp.json()["choices"][0]["message"]["content"]

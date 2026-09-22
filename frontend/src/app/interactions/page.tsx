@@ -130,11 +130,17 @@ export default function InteractionsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ drug_names: validDrugs }),
       });
-      if (!res.ok) throw new Error("Gagal cek interaksi");
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.detail || data?.error || "Gagal cek interaksi");
+      }
       const data = await res.json();
+      if (!Array.isArray(data.interactions) || !data.overall_safety || !data.summary) {
+        throw new Error("Format hasil analisis tidak valid");
+      }
       setResult(data);
-    } catch {
-      setError("Gagal menganalisis interaksi obat");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal menganalisis interaksi obat");
     } finally {
       setLoading(false);
     }

@@ -16,21 +16,41 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 OMNIROUTE_API_KEY = os.getenv("OMNIROUTE_API_KEY", "")
-OMNIROUTE_BASE_URL = os.getenv("OMNIROUTE_BASE_URL", "https://omniroute.online/v1")
+OMNIROUTE_BASE_URL = os.getenv("OMNIROUTE_BASE_URL", "")
+AI_MODEL = os.getenv("AI_MODEL", "openai/gpt-4o-mini")
 
 
-async def chat_completion(messages: list[dict], model: str = "auto") -> str:
-    async with httpx.AsyncClient(timeout=60) as client:
+async def chat_completion(messages: list[dict], model: str | None = None) -> str:
+    if OPENROUTER_API_KEY:
+        base_url, api_key = OPENROUTER_BASE_URL, OPENROUTER_API_KEY
+    elif OMNIROUTE_BASE_URL:
+        base_url, api_key = OMNIROUTE_BASE_URL, OMNIROUTE_API_KEY
+    else:
+        raise HTTPException(status_code=503, detail="Provider AI belum dikonfigurasi")
+
+    async with httpx.AsyncClient(timeout=60, follow_redirects=True) as client:
         resp = await client.post(
-            f"{OMNIROUTE_BASE_URL}/chat/completions",
+            f"{base_url.rstrip('/')}/chat/completions",
             headers={
-                "Authorization": f"Bearer {OMNIROUTE_API_KEY}",
+                "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
+                "HTTP-Referer": "https://pharm-ai-rouge.vercel.app",
+                "X-Title": "PharmAI",
             },
-            json={"model": model, "messages": messages, "max_tokens": 1024},
+            json={"model": model or AI_MODEL, "messages": messages, "max_tokens": 1024},
         )
-        resp.raise_for_status()
+        if not resp.is_success:
+            try:
+                message = resp.json().get("error", {}).get("message")
+            except Exception:
+                message = None
+            raise HTTPException(
+                status_code=502,
+                detail=f"Provider AI gagal (HTTP {resp.status_code}){f': {message}' if message else ''}",
+            )
         return resp.json()["choices"][0]["message"]["content"]
 
 
