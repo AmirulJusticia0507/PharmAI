@@ -29,6 +29,11 @@ def list_drugs(
     return query.offset(skip).limit(limit).all()
 
 
+@router.get("/count")
+def count_drugs(db: Session = Depends(get_db)):
+    return {"total": db.query(Drug).count()}
+
+
 @router.get("/{drug_id}", response_model=DrugResponse)
 def get_drug(drug_id: int, db: Session = Depends(get_db)):
     drug = db.query(Drug).filter(Drug.id == drug_id).first()

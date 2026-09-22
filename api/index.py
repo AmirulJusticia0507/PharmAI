@@ -187,6 +187,17 @@ def list_drugs(
         ]
 
 
+@app.get("/api/drugs/count")
+def count_drugs():
+    from sqlalchemy import create_engine, text
+
+    database_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/pharmaidb")
+    engine = create_engine(database_url)
+    with engine.connect() as connection:
+        total = connection.execute(text("SELECT COUNT(*) FROM drugs")).scalar_one()
+    return {"total": total}
+
+
 @app.get("/api/drugs/{drug_id}")
 def get_drug(drug_id: int):
     from sqlalchemy import JSON, Column, Date, DateTime, Integer, String, Text, create_engine

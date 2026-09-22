@@ -43,6 +43,13 @@ export async function fetchDrug(id: number): Promise<Drug> {
   return res.json();
 }
 
+export async function fetchDrugCount(): Promise<number> {
+  const res = await fetch(`${API_BASE}/api/drugs/count`);
+  if (!res.ok) throw new Error("Gagal mengambil jumlah obat");
+  const data = await res.json();
+  return data.total;
+}
+
 export async function createDrug(data: Partial<Drug>): Promise<Drug> {
   const res = await fetch(`${API_BASE}/api/drugs`, {
     method: "POST",
