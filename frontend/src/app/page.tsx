@@ -39,7 +39,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="site-footer"><div className="brand"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></div><span>Teknologi untuk keputusan kesehatan yang lebih baik.</span><div className="footer-links"><a href="/about">Tentang</a><a href="/help">Bantuan</a><a href="/privacy">Privasi</a><a href="/cookies">Cookies</a><span>© 2025 PharmAI</span></div></footer>
+      <footer className="site-footer"><div className="brand"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></div><span>Teknologi untuk keputusan kesehatan yang lebih baik.</span><div className="footer-links"><a href="/about">Tentang</a><a href="/help">Bantuan & FAQ</a><a href="/privacy">Privasi</a><a href="/cookies">Cookies</a><span>© 2026 PharmAI</span></div></footer>
     </main>
   );
 }
