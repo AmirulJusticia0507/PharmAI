@@ -43,8 +43,10 @@ export async function fetchDrug(id: number): Promise<Drug> {
   return res.json();
 }
 
-export async function fetchDrugCount(): Promise<number> {
-  const res = await fetch(`${API_BASE}/api/drugs/count`);
+export async function fetchDrugCount(search?: string): Promise<number> {
+  const query = new URLSearchParams();
+  if (search) query.set("search", search);
+  const res = await fetch(`${API_BASE}/api/drugs/count?${query}`);
   if (!res.ok) throw new Error("Gagal mengambil jumlah obat");
   const data = await res.json();
   return data.total;

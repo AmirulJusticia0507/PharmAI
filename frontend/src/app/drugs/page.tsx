@@ -9,22 +9,26 @@ const PAGE_SIZE = 10;
 export default function DrugsPage() {
   const [drugs, setDrugs] = useState<Drug[]>([]);
   const [totalDrugs, setTotalDrugs] = useState(0);
+  const [resultCount, setResultCount] = useState(0);
   const [search, setSearch] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadDrugs = async (q?: string) => {
+  const loadDrugs = async (q = "", pageNumber = 1) => {
     setLoading(true);
     setError(null);
     try {
       const [data, total] = await Promise.all([
-        fetchDrugs({ search: q, limit: 100 }),
-        fetchDrugCount(),
+        fetchDrugs({ search: q, skip: (pageNumber - 1) * PAGE_SIZE, limit: PAGE_SIZE }),
+        fetchDrugCount(q),
       ]);
       setDrugs(data);
-      setTotalDrugs(total);
-      setPage(1);
+      setResultCount(total);
+      if (!q) setTotalDrugs(total);
+      setActiveSearch(q);
+      setPage(pageNumber);
     } catch {
       setError("Gagal mengambil data obat");
     } finally {
@@ -38,11 +42,16 @@ export default function DrugsPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    loadDrugs(search);
+    loadDrugs(search.trim(), 1);
   };
 
-  const totalPages = Math.ceil(drugs.length / PAGE_SIZE);
-  const visibleDrugs = drugs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(resultCount / PAGE_SIZE));
+  const firstPageButton = Math.min(Math.max(page - 1, 1), Math.max(totalPages - 2, 1));
+  const pageButtons = Array.from(
+    { length: Math.min(3, totalPages) },
+    (_, index) => firstPageButton + index,
+  );
+  const goToPage = (pageNumber: number) => loadDrugs(activeSearch, pageNumber);
 
   return (
     <main className="drugs-shell">
@@ -58,10 +67,10 @@ export default function DrugsPage() {
         <div className="drugs-heading"><div><span className="section-kicker">PHARMAI LIBRARY</span><h1>Temukan obat,<br /><em>lebih mudah.</em></h1><p>Jelajahi informasi obat yang terkurasi untuk membantu Anda memahami apa yang dikonsumsi.</p></div><div className="library-stamp"><span>DATABASE</span><strong>{loading ? "--" : `${drugs.length.toLocaleString("id-ID")} / ${totalDrugs.toLocaleString("id-ID")}`}</strong><small>ditampilkan / total obat</small></div></div>
 
         <form onSubmit={handleSearch} className="drug-search"><span className="search-icon" aria-hidden="true">⌕</span><input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nama obat, generik, atau kategori..." aria-label="Cari obat" /><button type="submit">Cari <span aria-hidden="true">→</span></button></form>
-        <div className="catalog-toolbar"><span><strong>{loading ? "Memuat" : drugs.length}</strong> ditampilkan dari <strong>{totalDrugs.toLocaleString("id-ID")}</strong> obat</span><span className="catalog-note"><i /> Informasi untuk referensi, bukan pengganti konsultasi medis</span></div>
+        <div className="catalog-toolbar"><span><strong>{loading ? "Memuat" : drugs.length}</strong> ditampilkan dari <strong>{resultCount.toLocaleString("id-ID")}</strong> hasil</span><span className="catalog-note"><i /> Informasi untuk referensi, bukan pengganti konsultasi medis</span></div>
 
         {error && <div className="drugs-error"><strong>Data belum dapat dimuat.</strong><span>{error}</span><button onClick={() => loadDrugs(search)}>Coba lagi</button></div>}
-        {loading ? <div className="drug-grid"><div className="drug-skeleton" /><div className="drug-skeleton" /><div className="drug-skeleton" /></div> : drugs.length === 0 ? <div className="empty-drugs"><span>⌁</span><h2>{search ? `Tidak ada obat untuk "${search}"` : "Belum ada data obat"}</h2><p>Coba kata kunci lain atau mulai dengan memindai obat.</p><a href="/scan" className="primary-action">Scan obat <span aria-hidden="true">↗</span></a></div> : <><div className="drug-grid">{visibleDrugs.map((drug) => <DrugCard key={drug.id} drug={drug} />)}</div><nav className="drug-pagination" aria-label="Navigasi halaman obat"><button type="button" onClick={() => setPage(page - 1)} disabled={page === 1} aria-label="Halaman sebelumnya">←</button>{Array.from({ length: totalPages }, (_, index) => index + 1).map((number) => <button type="button" key={number} onClick={() => setPage(number)} className={number === page ? "active" : ""} aria-current={number === page ? "page" : undefined}>{number}</button>)}<button type="button" onClick={() => setPage(page + 1)} disabled={page === totalPages} aria-label="Halaman berikutnya">→</button></nav></>}
+        {loading ? <div className="drug-grid"><div className="drug-skeleton" /><div className="drug-skeleton" /><div className="drug-skeleton" /></div> : drugs.length === 0 ? <div className="empty-drugs"><span>⌁</span><h2>{activeSearch ? `Tidak ada obat untuk "${activeSearch}"` : "Belum ada data obat"}</h2><p>Coba kata kunci lain atau mulai dengan memindai obat.</p><a href="/scan" className="primary-action">Scan obat <span aria-hidden="true">↗</span></a></div> : <><div className="drug-grid">{drugs.map((drug) => <DrugCard key={drug.id} drug={drug} />)}</div><nav className="drug-pagination" aria-label="Navigasi halaman obat"><button type="button" onClick={() => goToPage(page - 1)} disabled={page === 1 || loading} aria-label="Halaman sebelumnya">←</button>{pageButtons.map((number) => <button type="button" key={number} onClick={() => goToPage(number)} className={number === page ? "active" : ""} aria-current={number === page ? "page" : undefined}>{number}</button>)}<button type="button" onClick={() => goToPage(page + 1)} disabled={page === totalPages || loading} aria-label="Halaman berikutnya">→</button><button type="button" className="pagination-last" onClick={() => goToPage(totalPages)} disabled={page === totalPages || loading}>Last</button></nav></>}
       </section>
     </main>
   );

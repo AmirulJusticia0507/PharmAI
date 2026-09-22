@@ -30,8 +30,16 @@ def list_drugs(
 
 
 @router.get("/count")
-def count_drugs(db: Session = Depends(get_db)):
-    return {"total": db.query(Drug).count()}
+def count_drugs(search: str | None = None, db: Session = Depends(get_db)):
+    query = db.query(Drug)
+    if search:
+        query = query.filter(
+            or_(
+                Drug.name.ilike(f"%{search}%"),
+                Drug.generic_name.ilike(f"%{search}%"),
+            )
+        )
+    return {"total": query.count()}
 
 
 @router.get("/{drug_id}", response_model=DrugResponse)

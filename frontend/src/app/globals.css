@@ -1204,6 +1204,11 @@
     opacity: .65;
 }
 
+.drug-pagination button.pagination-last {
+    width: auto;
+    padding: 0 13px;
+}
+
 .drug-card {
     display: block;
     position: relative;

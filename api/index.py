@@ -188,13 +188,19 @@ def list_drugs(
 
 
 @app.get("/api/drugs/count")
-def count_drugs():
+def count_drugs(search: str | None = None):
     from sqlalchemy import create_engine, text
 
     database_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/pharmaidb")
     engine = create_engine(database_url)
     with engine.connect() as connection:
-        total = connection.execute(text("SELECT COUNT(*) FROM drugs")).scalar_one()
+        if search:
+            total = connection.execute(
+                text("SELECT COUNT(*) FROM drugs WHERE name ILIKE :search OR generic_name ILIKE :search"),
+                {"search": f"%{search}%"},
+            ).scalar_one()
+        else:
+            total = connection.execute(text("SELECT COUNT(*) FROM drugs")).scalar_one()
     return {"total": total}
 
 
