@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 interface ScanResult {
   name: string;
   dosage: string;
+  dosage_form: string;
   category: string;
   active_ingredients: string[];
   registration_number: string;
@@ -44,7 +45,7 @@ export default function ScanPage() {
     try {
       const blob = await fetch(preview).then((r) => r.blob());
       const formData = new FormData();
-      formData.append("file", blob, "pill.jpg");
+      formData.append("file", blob, "medicine.jpg");
 
       const res = await fetch("/api/ai/scan-pill", {
         method: "POST",
@@ -57,6 +58,7 @@ export default function ScanPage() {
       setResult({
         name: "Gagal mengenali",
         dosage: "",
+        dosage_form: "",
         category: "",
         active_ingredients: [],
         registration_number: "",
@@ -79,13 +81,13 @@ export default function ScanPage() {
         <div className="nav-inner">
           <a href="/" className="brand" aria-label="PharmAI beranda"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></a>
           <div className="nav-links"><a href="/drugs">Database Obat</a><a href="/interactions">Interaksi</a><a href="/ocr">Resep</a></div>
-          <a href="/scan" className="nav-action scan-nav-active">Scan pil <span aria-hidden="true">↗</span></a>
+          <a href="/scan" className="nav-action scan-nav-active">Scan obat <span aria-hidden="true">↗</span></a>
         </div>
       </nav>
 
       <section className="scan-page">
         <div className="scan-heading">
-          <div><span className="section-kicker">PHARMAI VISION</span><h1>Identifikasi obat<br /><em>dalam sekejap.</em></h1><p>Ambil foto pil atau kapsul untuk mendapatkan informasi yang lebih jelas, cepat, dan terpercaya.</p></div>
+          <div><span className="section-kicker">PHARMAI VISION</span><h1>Identifikasi obat<br /><em>dalam sekejap.</em></h1><p>Ambil foto obat atau kemasannya, baik tablet, kapsul, cairan, maupun sediaan lainnya.</p></div>
           <div className="scan-step"><span>01</span><div><strong>UNGGAH FOTO</strong><small>Format JPG, PNG hingga 10 MB</small></div></div>
         </div>
 
@@ -94,7 +96,7 @@ export default function ScanPage() {
             <div onDrop={handleDrop} onDragOver={(e) => e.preventDefault()} onClick={openFilePicker} className="upload-zone" role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") openFilePicker(); }}>
               <div className="upload-orbit"><span>✦</span></div>
               <span className="upload-kicker">MULAI DARI SINI</span>
-              <h2>Letakkan foto pil Anda<br /><em>di area ini.</em></h2>
+              <h2>Letakkan foto obat Anda<br /><em>di area ini.</em></h2>
               <p>Seret & lepas foto, atau pilih dari perangkat Anda.</p>
               <div className="upload-actions">
                 <button onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }} className="primary-action">Pilih dari perangkat <span aria-hidden="true">↗</span></button>
@@ -104,14 +106,14 @@ export default function ScanPage() {
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
               <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" />
             </div>
-            <aside className="scan-tips"><span className="section-kicker">TIPS FOTO TERBAIK</span><h3>Hasil yang lebih akurat dimulai dari foto yang baik.</h3><div className="tip-list"><div><span>01</span><p>Letakkan obat di permukaan yang datar.</p></div><div><span>02</span><p>Pastikan pil terlihat jelas dan tidak buram.</p></div><div><span>03</span><p>Gunakan cahaya alami, hindari bayangan.</p></div></div></aside>
+            <aside className="scan-tips"><span className="section-kicker">TIPS FOTO TERBAIK</span><h3>Hasil yang lebih akurat dimulai dari foto yang baik.</h3><div className="tip-list"><div><span>01</span><p>Foto obat bersama kemasan atau labelnya.</p></div><div><span>02</span><p>Pastikan nama dan dosis terlihat jelas.</p></div><div><span>03</span><p>Gunakan cahaya alami, hindari bayangan.</p></div></div></aside>
           </div>
         ) : (
           <div className="scan-workspace preview-workspace">
-            <div className="preview-panel"><div className="preview-label"><span>FOTO SIAP DIANALISIS</span><button onClick={handleReset} aria-label="Hapus foto">✕</button></div><img src={preview} alt="Preview pil" /></div>
+            <div className="preview-panel"><div className="preview-label"><span>FOTO SIAP DIANALISIS</span><button onClick={handleReset} aria-label="Hapus foto">✕</button></div><img src={preview} alt="Pratinjau obat" /></div>
             <div className="result-column">
               {!result && <div className="scan-ready"><span className="section-kicker">LANGKAH BERIKUTNYA</span><h2>Foto Anda sudah siap.</h2><p>Biarkan PharmAI membaca bentuk, warna, dan karakteristik obat ini.</p><button onClick={handleScan} disabled={scanning} className="primary-action scan-submit">{scanning ? "Memindai dengan AI..." : "Mulai analisis AI"}<span aria-hidden="true">→</span></button><button onClick={handleReset} className="reset-action">Pilih foto lain</button></div>}
-              {result && <div className="result-card"><div className="result-card-top"><span className="section-kicker">HASIL IDENTIFIKASI</span>{result.confidence > 0 && <span className="confidence-badge">{Math.round(result.confidence * 100)}% yakin</span>}</div><h2>{result.name}</h2>{result.dosage && <div className="result-line"><span>DOSIS</span><strong>{result.dosage}</strong></div>}{result.category && <div className="result-line"><span>KATEGORI</span><strong>{result.category}</strong></div>}{result.active_ingredients?.length > 0 && <div className="result-line"><span>ZAT AKTIF</span><strong>{result.active_ingredients.join(", ")}</strong></div>}{result.registration_number && <div className="result-line"><span>NOMOR IZIN TERBACA</span><strong>{result.registration_number}</strong></div>}<p>{result.description}</p><small className="scan-verification-note">Identifikasi gambar belum membuktikan izin edar. Cocokkan nomor dan komposisi dengan sumber resmi BPOM.</small><div className="result-actions"><button onClick={handleReset} className="reset-action">Scan lagi</button><a href="/drugs" className="primary-action">Lihat database <span aria-hidden="true">↗</span></a></div></div>}
+              {result && <div className="result-card"><div className="result-card-top"><span className="section-kicker">HASIL IDENTIFIKASI</span>{result.confidence > 0 && <span className="confidence-badge">{Math.round(result.confidence * 100)}% yakin</span>}</div><h2>{result.name}</h2>{result.dosage_form && <div className="result-line"><span>BENTUK SEDIAAN</span><strong>{result.dosage_form}</strong></div>}{result.dosage && <div className="result-line"><span>DOSIS</span><strong>{result.dosage}</strong></div>}{result.category && <div className="result-line"><span>KATEGORI</span><strong>{result.category}</strong></div>}{result.active_ingredients?.length > 0 && <div className="result-line"><span>ZAT AKTIF</span><strong>{result.active_ingredients.join(", ")}</strong></div>}{result.registration_number && <div className="result-line"><span>NOMOR IZIN TERBACA</span><strong>{result.registration_number}</strong></div>}<p>{result.description}</p><small className="scan-verification-note">Identifikasi gambar belum membuktikan izin edar. Cocokkan nomor dan komposisi dengan sumber resmi BPOM.</small><div className="result-actions"><button onClick={handleReset} className="reset-action">Scan lagi</button><a href="/drugs" className="primary-action">Lihat database <span aria-hidden="true">↗</span></a></div></div>}
             </div>
           </div>
         )}

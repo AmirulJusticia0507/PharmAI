@@ -35,8 +35,10 @@ async def analyze_pill_image(image_bytes: bytes, mime: str = "image/jpeg") -> di
                 {
                     "type": "text",
                     "text": (
-                        "Analisis foto pil, kapsul, atau kemasan obat ini. Kembalikan JSON: "
-                        '{"name": "nama obat", "dosage": "dosis", '
+                        "Analisis foto obat atau kemasannya, termasuk tablet, kaplet, kapsul, cairan, "
+                        "sirup, suspensi, tetes, salep, krim, gel, inhaler, injeksi, suppositoria, atau "
+                        "patch. Kembalikan JSON: "
+                        '{"name": "nama obat", "dosage": "dosis", "dosage_form": "bentuk sediaan", '
                         '"category": "kategori dalam Bahasa Indonesia", '
                         '"active_ingredients": ["nama zat aktif"], '
                         '"registration_number": "nomor yang terlihat pada kemasan atau kosong", '
@@ -44,7 +46,9 @@ async def analyze_pill_image(image_bytes: bytes, mime: str = "image/jpeg") -> di
                         '"confidence": 0.0-1.0}. '
                         "Pertahankan nama obat, dosis, dan zat aktif sebagaimana tertulis. Jangan "
                         "mengarang kandungan atau nomor izin edar. Jika tidak terlihat jelas, gunakan "
-                        "nilai kosong dan confidence rendah. Hanya kembalikan JSON valid."
+                        "nilai kosong dan confidence rendah. Utamakan tulisan pada kemasan; jangan "
+                        "mengenali obat cair atau topikal hanya dari warna dan bentuk wadah. Hanya "
+                        "kembalikan JSON valid."
                     ),
                 },
                 {
@@ -64,8 +68,9 @@ async def analyze_pill_image(image_bytes: bytes, mime: str = "image/jpeg") -> di
         return json.loads(cleaned)
     except Exception:
         return {
-            "name": "Unknown",
+            "name": "Tidak teridentifikasi",
             "dosage": "",
+            "dosage_form": "",
             "category": "",
             "active_ingredients": [],
             "registration_number": "",

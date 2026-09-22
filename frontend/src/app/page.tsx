@@ -33,7 +33,7 @@ export default function Home() {
       <section className="feature-section">
         <div className="section-heading"><span className="section-kicker">SATU PLATFORM, LEBIH TENANG</span><h2>Yang Anda butuhkan<br /><span>untuk memahami obat.</span></h2></div>
         <div className="feature-grid">
-          <a href="/scan" className="feature-card feature-blue"><span className="feature-icon">⌕</span><span className="card-number">01</span><h3>Identifikasi pil</h3><p>Kenali pil dan kapsul dari foto dengan bantuan analisis visual AI.</p><span className="card-arrow">↗</span></a>
+          <a href="/scan" className="feature-card feature-blue"><span className="feature-icon">⌕</span><span className="card-number">01</span><h3>Identifikasi obat</h3><p>Kenali berbagai bentuk sediaan obat dan kemasannya dengan analisis visual AI.</p><span className="card-arrow">↗</span></a>
           <a href="/interactions" className="feature-card feature-lime"><span className="feature-icon">◌</span><span className="card-number">02</span><h3>Cek interaksi</h3><p>Periksa kombinasi obat dan pahami hal penting sebelum dikonsumsi.</p><span className="card-arrow">↗</span></a>
           <a href="/ocr" className="feature-card feature-white"><span className="feature-icon">≡</span><span className="card-number">03</span><h3>Transkrip resep</h3><p>Ubah tulisan resep dokter menjadi informasi yang lebih mudah dibaca.</p><span className="card-arrow">↗</span></a>
         </div>

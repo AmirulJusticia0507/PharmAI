@@ -76,14 +76,18 @@ async def scan_pill(file: UploadFile = File(...)):
             "role": "user",
             "content": [
                 {"type": "text", "text": (
-                    "Analisis foto pil, kapsul, atau kemasan obat ini. Kembalikan JSON: "
-                    '{"name":"nama obat","dosage":"dosis","category":"kategori dalam Bahasa Indonesia",'
+                    "Analisis foto obat atau kemasannya, termasuk tablet, kaplet, kapsul, cairan, "
+                    "sirup, suspensi, tetes, salep, krim, gel, inhaler, injeksi, suppositoria, atau patch. "
+                    "Kembalikan JSON: "
+                    '{"name":"nama obat","dosage":"dosis","dosage_form":"bentuk sediaan",'
+                    '"category":"kategori dalam Bahasa Indonesia",'
                     '"active_ingredients":["nama zat aktif"],'
                     '"registration_number":"nomor yang terlihat pada kemasan atau kosong",'
                     '"description":"deskripsi singkat dalam Bahasa Indonesia","confidence":0.0-1.0}. '
                     "Pertahankan nama obat, dosis, dan zat aktif sebagaimana tertulis. Jangan mengarang "
                     "kandungan atau nomor izin edar. Jika tidak terlihat jelas, gunakan nilai kosong dan "
-                    "confidence rendah. Hanya kembalikan JSON valid."
+                    "confidence rendah. Utamakan tulisan pada kemasan; jangan mengenali obat cair atau "
+                    "topikal hanya dari warna dan bentuk wadah. Hanya kembalikan JSON valid."
                 )},
                 {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
             ],
@@ -94,7 +98,7 @@ async def scan_pill(file: UploadFile = File(...)):
         return parse_json_response(result)
     except Exception:
         return {
-            "name": "Unknown", "description": result,
+            "name": "Tidak teridentifikasi", "description": result, "dosage_form": "",
             "active_ingredients": [], "registration_number": "", "confidence": 0.0,
         }
 
