@@ -14,7 +14,7 @@ class Drug(Base):
     indication = Column(Text, nullable=True)
     benefit = Column(Text, nullable=True)
     dosage = Column(Text, nullable=True)
-    usage_time = Column(JSON, nullable=True, default=list)
+    usage_time = Column(JSON, nullable=False, default=list)
     frequency = Column(String(100), nullable=True)
     manufacturer = Column(String(255), nullable=True)
     image_url = Column(String(500), nullable=True)
