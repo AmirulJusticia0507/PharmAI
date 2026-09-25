@@ -33,8 +33,8 @@ OMNIROUTE_API_KEY = os.getenv("OMNIROUTE_API_KEY", "")
 OMNIROUTE_BASE_URL = os.getenv("OMNIROUTE_BASE_URL", "")
 AI_MODEL = os.getenv("AI_MODEL", "openai/gpt-4o-mini")
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+OPENAI_API_KEY = os.getenv("BAZAARLINK_API_KEY", "")
+BAZAARLINK_BASE_URL = os.getenv("BAZAARLINK_BASE_URL", "https://api.bazaarlink.ai/v1")
 PREMIUM_IMAGE_MODEL = os.getenv("PREMIUM_IMAGE_MODEL", "dall-e-3")
 STANDARD_IMAGE_MODEL = os.getenv("STANDARD_IMAGE_MODEL", "dall-e-2")
 
@@ -866,7 +866,7 @@ async def generate_drug_image(req: DrugVisualRequest):
 
     async with httpx.AsyncClient(timeout=60) as client:
         resp = await client.post(
-            f"{OPENAI_BASE_URL.rstrip('/')}/images/generations",
+            f"{BAZAARLINK_BASE_URL.rstrip('/')}/images/generations",
             headers={
                 "Authorization": f"Bearer {OPENAI_API_KEY}",
                 "Content-Type": "application/json",
