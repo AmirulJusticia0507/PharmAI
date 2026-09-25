@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchDrugCount, fetchDrugs, fetchDrugAnalysis, type Drug, type DrugAnalysis } from "@/lib/api";
+import { fetchDrugCount, fetchDrugs, fetchDrugAnalysis, generateDrugImage, type Drug, type DrugAnalysis, type DrugVisualResult } from "@/lib/api";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -18,6 +18,8 @@ export default function DrugsPage() {
   const [analyzingId, setAnalyzingId] = useState<number | null>(null);
   const [analysisDrug, setAnalysisDrug] = useState<Drug | null>(null);
   const [analysisResult, setAnalysisResult] = useState<DrugAnalysis | null>(null);
+  const [generatingId, setGeneratingId] = useState<number | null>(null);
+  const [imageResult, setImageResult] = useState<DrugVisualResult | null>(null);
 
   const loadDrugs = async (q = "", pageNumber = 1) => {
     setLoading(true);
@@ -66,6 +68,22 @@ export default function DrugsPage() {
     }
   };
 
+  const handleGenerateImage = async (drug: Drug) => {
+    setGeneratingId(drug.id);
+    try {
+      const result = await generateDrugImage(drug.id, false);
+      setImageResult(result);
+    } catch {
+      setImageResult(null);
+    } finally {
+      setGeneratingId(null);
+    }
+  };
+
+  const closeImage = () => {
+    setImageResult(null);
+  };
+
   const closeAnalysis = () => {
     setAnalysisDrug(null);
     setAnalysisResult(null);
@@ -88,7 +106,7 @@ export default function DrugsPage() {
         <div className="catalog-toolbar"><span><strong>{loading ? "Memuat" : drugs.length}</strong> ditampilkan dari <strong>{resultCount.toLocaleString("id-ID")}</strong> hasil</span><span className="catalog-note"><i /> Informasi untuk referensi, bukan pengganti konsultasi medis</span></div>
 
         {error && <div className="drugs-error"><strong>Data belum dapat dimuat.</strong><span>{error}</span><button onClick={() => loadDrugs(search)}>Coba lagi</button></div>}
-        {loading ? <div className="drug-grid"><div className="drug-skeleton" /><div className="drug-skeleton" /><div className="drug-skeleton" /></div> : drugs.length === 0 ? <div className="empty-drugs"><span>⌁</span><h2>{activeSearch ? `Tidak ada obat untuk "${activeSearch}"` : "Belum ada data obat"}</h2><p>Coba kata kunci lain atau mulai dengan memindai obat.</p><a href="/scan" className="primary-action">Scan obat <span aria-hidden="true">↗</span></a></div>         : <><div className="drug-grid">{drugs.map((drug) => <DrugCard key={drug.id} drug={drug} onAnalyze={handleAnalyze} isAnalyzing={analyzingId === drug.id} />)}</div><nav className="drug-pagination" aria-label="Navigasi halaman obat"><button type="button" onClick={() => goToPage(page - 1)} disabled={page === 1 || loading} aria-label="Halaman sebelumnya">←</button><button type="button" onClick={() => goToPage(1)} className={page === 1 ? "active" : ""} aria-current={page === 1 ? "page" : undefined}>1</button>{page > 3 && <span className="pagination-gap">…</span>}{nearbyPages.map((number) => <button type="button" key={number} onClick={() => goToPage(number)} className={number === page ? "active" : ""} aria-current={number === page ? "page" : undefined}>{number}</button>)}<button type="button" onClick={() => goToPage(page + 1)} disabled={page === totalPages || loading} aria-label="Halaman berikutnya">→</button><button type="button" className="pagination-last" onClick={() => goToPage(totalPages)} disabled={page === totalPages || loading}>Last</button></nav></>}
+        {loading ? <div className="drug-grid"><div className="drug-skeleton" /><div className="drug-skeleton" /><div className="drug-skeleton" /></div> : drugs.length === 0 ? <div className="empty-drugs"><span>⌁</span><h2>{activeSearch ? `Tidak ada obat untuk "${activeSearch}"` : "Belum ada data obat"}</h2><p>Coba kata kunci lain atau mulai dengan memindai obat.</p><a href="/scan" className="primary-action">Scan obat <span aria-hidden="true">↗</span></a></div>         : <><div className="drug-grid">{drugs.map((drug) => <DrugCard key={drug.id} drug={drug} onAnalyze={handleAnalyze} isAnalyzing={analyzingId === drug.id} onGenerateImage={handleGenerateImage} isGenerating={generatingId === drug.id} />)}</div><nav className="drug-pagination" aria-label="Navigasi halaman obat"><button type="button" onClick={() => goToPage(page - 1)} disabled={page === 1 || loading} aria-label="Halaman sebelumnya">←</button><button type="button" onClick={() => goToPage(1)} className={page === 1 ? "active" : ""} aria-current={page === 1 ? "page" : undefined}>1</button>{page > 3 && <span className="pagination-gap">…</span>}{nearbyPages.map((number) => <button type="button" key={number} onClick={() => goToPage(number)} className={number === page ? "active" : ""} aria-current={number === page ? "page" : undefined}>{number}</button>)}<button type="button" onClick={() => goToPage(page + 1)} disabled={page === totalPages || loading} aria-label="Halaman berikutnya">→</button><button type="button" className="pagination-last" onClick={() => goToPage(totalPages)} disabled={page === totalPages || loading}>Last</button></nav></>}
 
         {analysisDrug && (
           <div className="analysis-overlay" onClick={closeAnalysis}>
@@ -131,12 +149,43 @@ export default function DrugsPage() {
             </div>
           </div>
         )}
+
+        {imageResult && (
+          <div className="analysis-overlay" onClick={closeImage}>
+            <div className="analysis-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="analysis-header">
+                <h3>Gambar Obat</h3>
+                <button type="button" className="analysis-close" onClick={closeImage} aria-label="Tutup">✕</button>
+              </div>
+              <div className="analysis-content">
+                {imageResult.image_url ? (
+                  <div className="analysis-field">
+                    <img
+                      src={imageResult.image_url}
+                      alt="Visualisasi obat yang dihasilkan"
+                      style={{ width: "100%", borderRadius: "8px", maxHeight: "480px", objectFit: "contain" }}
+                    />
+                    {imageResult.revised_prompt && (
+                      <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.5rem" }}>
+                        {imageResult.revised_prompt}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="analysis-field">
+                    <p>Gagal menghasilkan gambar. Coba lagi nanti.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </section>
     </main>
   );
 }
 
-function DrugCard({ drug, onAnalyze, isAnalyzing }: { drug: Drug; onAnalyze: (drug: Drug) => void; isAnalyzing: boolean }) {
+function DrugCard({ drug, onAnalyze, isAnalyzing, onGenerateImage, isGenerating }: { drug: Drug; onAnalyze: (drug: Drug) => void; isAnalyzing: boolean; onGenerateImage: (drug: Drug) => void; isGenerating: boolean }) {
   return (
     <Link href={`/drugs/${drug.id}`} className="drug-card" aria-label={`Lihat detail ${drug.name}`}>
       <div className="drug-card-top"><div className={`drug-avatar ${drug.image_url ? "has-image" : ""}`}>{drug.image_url ? <img src={drug.image_url} alt="" /> : <span>{drug.name.charAt(0).toUpperCase()}</span>}</div><div className="drug-card-meta">{drug.category && <span className="drug-category">{drug.category}</span>}<span className="drug-id">ID {String(drug.id).padStart(3, "0")}</span></div></div>
@@ -153,6 +202,16 @@ function DrugCard({ drug, onAnalyze, isAnalyzing }: { drug: Drug; onAnalyze: (dr
           disabled={isAnalyzing}
         >
           {isAnalyzing ? "⏳" : "✦ AI"}
+        </button>
+        <button
+          type="button"
+          className="drug-generate-btn"
+          aria-label={`Generate gambar ${drug.name}`}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onGenerateImage(drug); }}
+          disabled={isGenerating}
+          style={{ marginLeft: "0.25rem" }}
+        >
+          {isGenerating ? "⏳" : "🖼️"}
         </button>
         <span className="drug-card-mark" aria-hidden="true">✦</span>
       </div>

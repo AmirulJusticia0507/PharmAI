@@ -150,3 +150,23 @@ export async function clearAgentTasks(): Promise<{ status: string; tasks: [] }> 
   if (!res.ok) throw new Error("Gagal membersihkan task");
   return res.json();
 }
+
+export interface DrugVisualResult {
+  image_url: string;
+  revised_prompt: string;
+  model: string;
+  premium: boolean;
+}
+
+export async function generateDrugImage(
+  drugId: number,
+  usePremium: boolean = false,
+): Promise<DrugVisualResult> {
+  const res = await fetch(`${API_BASE}/api/ai/generate-drug-image`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ drug_id: drugId, use_premium: usePremium }),
+  });
+  if (!res.ok) throw new Error("Gagal menghasilkan gambar obat");
+  return res.json();
+}

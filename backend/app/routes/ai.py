@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from ..ai_service import analyze_pill_image, ocr_prescription, check_drug_interactions, analyze_drug
+from ..ai_service import analyze_pill_image, ocr_prescription, check_drug_interactions, analyze_drug, generate_drug_visual
 from ..database import get_db
 from ..models import Drug
 
@@ -14,6 +14,11 @@ class InteractionRequest(BaseModel):
 
 class DrugAnalyzeRequest(BaseModel):
     drug_id: int
+
+
+class DrugVisualRequest(BaseModel):
+    drug_id: int
+    use_premium: bool = False
 
 
 @router.post("/scan-pill")
@@ -60,4 +65,25 @@ async def analyze_endpoint(req: DrugAnalyzeRequest, db: Session = Depends(get_db
         "active_ingredients": drug.active_ingredients or [],
     }
     result = await analyze_drug(drug_data)
+    return result
+
+
+@router.post("/generate-drug-image")
+async def generate_drug_image(req: DrugVisualRequest, db: Session = Depends(get_db)):
+    drug = db.query(Drug).filter(Drug.id == req.drug_id).first()
+    if not drug:
+        raise HTTPException(status_code=404, detail="Obat tidak ditemukan")
+    drug_data = {
+        "name": drug.name,
+        "generic_name": drug.generic_name,
+        "dosage_form": drug.dosage_form,
+        "manufacturer": drug.manufacturer,
+        "description": drug.description,
+        "active_ingredients": drug.active_ingredients or [],
+        "dosage": drug.dosage or "",
+        "color": getattr(drug, "color", "") or "",
+        "shape": getattr(drug, "shape", "") or "",
+        "imprint": getattr(drug, "imprint", "") or "",
+    }
+    result = await generate_drug_visual(drug_data, use_premium=req.use_premium)
     return result

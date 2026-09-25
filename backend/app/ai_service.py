@@ -9,6 +9,11 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 AI_MODEL = os.getenv("AI_MODEL", "openai/gpt-4o-mini")
 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_BASE_URL = "https://api.openai.com/v1"
+PREMIUM_IMAGE_MODEL = os.getenv("PREMIUM_IMAGE_MODEL", "dall-e-3")
+STANDARD_IMAGE_MODEL = os.getenv("STANDARD_IMAGE_MODEL", "dall-e-2")
+
 
 async def chat_completion(messages: list[dict], model: str | None = None) -> str:
     async with httpx.AsyncClient(timeout=60) as client:
@@ -245,3 +250,65 @@ async def analyze_drug(drug_data: dict) -> dict:
             "confidence": 0.0,
             "raw_response": result,
         }
+
+
+async def generate_drug_visual(drug_data: dict, use_premium: bool = False) -> dict:
+    if not OPENAI_API_KEY:
+        raise ValueError("OPENAI_API_KEY belum dikonfigurasi untuk generasi gambar")
+
+    name = drug_data.get("name") or ""
+    generic_name = drug_data.get("generic_name") or ""
+    dosage_form = drug_data.get("dosage_form") or ""
+    manufacturer = drug_data.get("manufacturer") or ""
+    description = drug_data.get("description") or ""
+    active_ingredients = drug_data.get("active_ingredients") or []
+    dosage = drug_data.get("dosage") or ""
+    color = drug_data.get("color") or ""
+    shape = drug_data.get("shape") or ""
+    imprint = drug_data.get("imprint") or ""
+
+    prompt = (
+        f"Gambar realistis dari obat atau kemasannya. "
+        f"Nama obat: {name}. Nama generik: {generic_name}. "
+        f"Bentuk sediaan: {dosage_form}. "
+        f"Warna: {color or 'tidak ditentukan'}. "
+        f"Bentuk: {shape or 'tidak ditentukan'}. "
+        f"Imprint/atau kode pada permukaan: {imprint or 'tidak ada'}. "
+        f"Dosis: {dosage or 'tidak ditentukan'}. "
+        f"PRODUSEN: {manufacturer or 'tidak ditentukan'}. "
+        f"Zat aktif: {', '.join(active_ingredients) if active_ingredients else 'N/A'}. "
+        f"Deskripsi: {description or 'tidak tersedia'}. "
+        f"Gambarkan permukaan obat (tablet, kapsul, kaplet) secara detail termasuk warna, "
+        f"bentuk, tekstur, dan imprint jika ada. Jika obat cair, gambarkan butir/ Botol "
+        f"kemasannya. Fotografi realistis dengan pencahayaan studio yang baik, latar belakang "
+        f"putih bersih. Jangan termasuk teks, logo, atau watermark."
+    )
+
+    model = PREMIUM_IMAGE_MODEL if use_premium else STANDARD_IMAGE_MODEL
+
+    async with httpx.AsyncClient(timeout=60) as client:
+        resp = await client.post(
+            f"{OPENAI_BASE_URL}/images/generations",
+            headers={
+                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": model,
+                "prompt": prompt,
+                "n": 1,
+                "size": "1024x1024",
+            },
+        )
+        resp.raise_for_status()
+        data = resp.json()
+
+    image_url = data.get("data", [{}])[0].get("url", "")
+    revised_prompt = data.get("data", [{}])[0].get("revised_prompt", "")
+
+    return {
+        "image_url": image_url,
+        "revised_prompt": revised_prompt,
+        "model": model,
+        "premium": use_premium,
+    }

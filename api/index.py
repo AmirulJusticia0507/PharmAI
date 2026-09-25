@@ -33,6 +33,11 @@ OMNIROUTE_API_KEY = os.getenv("OMNIROUTE_API_KEY", "")
 OMNIROUTE_BASE_URL = os.getenv("OMNIROUTE_BASE_URL", "")
 AI_MODEL = os.getenv("AI_MODEL", "openai/gpt-4o-mini")
 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+PREMIUM_IMAGE_MODEL = os.getenv("PREMIUM_IMAGE_MODEL", "dall-e-3")
+STANDARD_IMAGE_MODEL = os.getenv("STANDARD_IMAGE_MODEL", "dall-e-2")
+
 
 async def chat_completion(messages: list[dict], model: str | None = None) -> str:
     if OPENROUTER_API_KEY:
@@ -784,3 +789,112 @@ def agent_tasks():
 def agent_clear_tasks():
     _agent_state["tasks"] = []
     return {"status": "cleared", "tasks": []}
+
+
+class DrugVisualRequest(BaseModel):
+    drug_id: int
+    use_premium: bool = False
+
+
+@app.post("/api/ai/generate-drug-image")
+async def generate_drug_image(req: DrugVisualRequest):
+    from sqlalchemy import JSON, Column, Date, DateTime, Integer, String, Text, create_engine
+    from sqlalchemy.orm import DeclarativeBase, Session
+
+    if not OPENAI_API_KEY:
+        raise HTTPException(
+            status_code=503,
+            detail="OPENAI_API_KEY belum dikonfigurasi untuk generasi gambar",
+        )
+
+    database_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/pharmaidb")
+    engine = create_engine(database_url)
+
+    class Base(DeclarativeBase):
+        pass
+
+    class Drug(Base):
+        __tablename__ = "drugs"
+        id = Column(Integer, primary_key=True)
+        name = Column(String(255))
+        generic_name = Column(String(255))
+        category = Column(String(100))
+        description = Column(Text)
+        dosage_form = Column(String(500))
+        manufacturer = Column(String(255))
+        dosage = Column(Text)
+        active_ingredients = Column(JSON)
+        color = Column(String(100))
+        shape = Column(String(100))
+        imprint = Column(String(255))
+
+    with Session(engine) as db:
+        drug = db.query(Drug).filter(Drug.id == req.drug_id).first()
+        if not drug:
+            raise HTTPException(status_code=404, detail="Drug not found")
+        drug_data = {
+            "name": drug.name,
+            "generic_name": drug.generic_name or "",
+            "dosage_form": drug.dosage_form or "",
+            "manufacturer": drug.manufacturer or "",
+            "description": drug.description or "",
+            "active_ingredients": drug.active_ingredients or [],
+            "dosage": drug.dosage or "",
+            "color": drug.color or "",
+            "shape": drug.shape or "",
+            "imprint": drug.imprint or "",
+        }
+
+    prompt = (
+        f"Gambar realistis dari obat atau kemasannya. "
+        f"Nama obat: {drug_data['name']}. Nama generik: {drug_data['generic_name']}. "
+        f"Bentuk sediaan: {drug_data['dosage_form']}. "
+        f"Warna: {drug_data['color'] or 'tidak ditentukan'}. "
+        f"Bentuk: {drug_data['shape'] or 'tidak ditentukan'}. "
+        f"Imprint/atau kode pada permukaan: {drug_data['imprint'] or 'tidak ada'}. "
+        f"Dosis: {drug_data['dosage'] or 'tidak ditentukan'}. "
+        f"PRODUSEN: {drug_data['manufacturer'] or 'tidak ditentukan'}. "
+        f"Zat aktif: {', '.join(drug_data['active_ingredients']) if drug_data['active_ingredients'] else 'N/A'}. "
+        f"Deskripsi: {drug_data['description'] or 'tidak tersedia'}. "
+        f"Gambarkan permukaan obat (tablet, kapsul, kaplet) secara detail termasuk warna, "
+        f"bentuk, tekstur, dan imprint jika ada. Jika obat cair, gambarkan butir/ Botol "
+        f"kemasannya. Fotografi realistis dengan pencahayaan studio yang baik, latar belakang "
+        f"putih bersih. Jangan termasuk teks, logo, atau watermark."
+    )
+
+    model = PREMIUM_IMAGE_MODEL if req.use_premium else STANDARD_IMAGE_MODEL
+
+    async with httpx.AsyncClient(timeout=60) as client:
+        resp = await client.post(
+            f"{OPENAI_BASE_URL.rstrip('/')}/images/generations",
+            headers={
+                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": model,
+                "prompt": prompt,
+                "n": 1,
+                "size": "1024x1024",
+            },
+        )
+        if not resp.is_success:
+            try:
+                message = resp.json().get("error", {}).get("message")
+            except Exception:
+                message = None
+            raise HTTPException(
+                status_code=502,
+                detail=f"Provider AI gagal (HTTP {resp.status_code}){f': {message}' if message else ''}",
+            )
+        data = resp.json()
+
+    image_url = data.get("data", [{}])[0].get("url", "")
+    revised_prompt = data.get("data", [{}])[0].get("revised_prompt", "")
+
+    return {
+        "image_url": image_url,
+        "revised_prompt": revised_prompt,
+        "model": model,
+        "premium": req.use_premium,
+    }
