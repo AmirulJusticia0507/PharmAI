@@ -87,3 +87,66 @@ export async function fetchDrugAnalysis(drugId: number): Promise<DrugAnalysis> {
   if (!res.ok) throw new Error("Gagal menganalisis obat");
   return res.json();
 }
+
+export interface AgentStatus {
+  running: boolean;
+  processed: number;
+  total: number;
+  failed: number;
+  current_drug: { id: number; name: string } | null;
+  started_at: string | null;
+  last_run: string | null;
+  unanalyzed_count: number;
+  analyzed_count: number;
+}
+
+export interface AgentRunResult {
+  status: string;
+  batch_size?: number;
+  processed: number;
+  failed: number;
+  results: Array<{
+    drug_id: number;
+    name: string;
+    status: "success" | "failed";
+    confidence?: number;
+    error?: string;
+  }>;
+}
+
+export interface AgentTasks {
+  running: boolean;
+  tasks: AgentRunResult["results"];
+  processed: number;
+  failed: number;
+  total: number;
+  last_run: string | null;
+}
+
+export async function fetchAgentStatus(): Promise<AgentStatus> {
+  const res = await fetch(`${API_BASE}/api/agent/status`);
+  if (!res.ok) throw new Error("Gagal memeriksa status agent");
+  return res.json();
+}
+
+export async function runAgentBatch(batchSize: number = 5): Promise<AgentRunResult> {
+  const res = await fetch(`${API_BASE}/api/agent/run`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ batch_size: batchSize }),
+  });
+  if (!res.ok) throw new Error("Gagal menjalankan agent");
+  return res.json();
+}
+
+export async function fetchAgentTasks(): Promise<AgentTasks> {
+  const res = await fetch(`${API_BASE}/api/agent/tasks`);
+  if (!res.ok) throw new Error("Gagal mengambil riwayat task");
+  return res.json();
+}
+
+export async function clearAgentTasks(): Promise<{ status: string; tasks: [] }> {
+  const res = await fetch(`${API_BASE}/api/agent/tasks/clear`);
+  if (!res.ok) throw new Error("Gagal membersihkan task");
+  return res.json();
+}
