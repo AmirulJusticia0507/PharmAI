@@ -9,7 +9,7 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 AI_MODEL = os.getenv("AI_MODEL", "openai/gpt-4o-mini")
 
-OPENAI_API_KEY = os.getenv("BAZAARLINK_API_KEY", "")
+BAZAARLINK_API_KEY = os.getenv("BAZAARLINK_API_KEY", "")
 BAZAARLINK_BASE_URL = os.getenv("BAZAARLINK_BASE_URL", "https://api.bazaarlink.ai/v1")
 PREMIUM_IMAGE_MODEL = os.getenv("PREMIUM_IMAGE_MODEL", "dall-e-3")
 STANDARD_IMAGE_MODEL = os.getenv("STANDARD_IMAGE_MODEL", "dall-e-2")
@@ -253,8 +253,8 @@ async def analyze_drug(drug_data: dict) -> dict:
 
 
 async def generate_drug_visual(drug_data: dict, use_premium: bool = False) -> dict:
-    if not OPENAI_API_KEY:
-        raise ValueError("OPENAI_API_KEY belum dikonfigurasi untuk generasi gambar")
+    if not BAZAARLINK_API_KEY:
+        raise ValueError("BAZAARLINK_API_KEY belum dikonfigurasi untuk generasi gambar")
 
     name = drug_data.get("name") or ""
     generic_name = drug_data.get("generic_name") or ""
@@ -290,7 +290,7 @@ async def generate_drug_visual(drug_data: dict, use_premium: bool = False) -> di
         resp = await client.post(
             f"{BAZAARLINK_BASE_URL}/images/generations",
             headers={
-                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Authorization": f"Bearer {BAZAARLINK_API_KEY}",
                 "Content-Type": "application/json",
             },
             json={

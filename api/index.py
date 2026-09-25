@@ -33,7 +33,7 @@ OMNIROUTE_API_KEY = os.getenv("OMNIROUTE_API_KEY", "")
 OMNIROUTE_BASE_URL = os.getenv("OMNIROUTE_BASE_URL", "")
 AI_MODEL = os.getenv("AI_MODEL", "openai/gpt-4o-mini")
 
-OPENAI_API_KEY = os.getenv("BAZAARLINK_API_KEY", "")
+BAZAARLINK_API_KEY = os.getenv("BAZAARLINK_API_KEY", "")
 BAZAARLINK_BASE_URL = os.getenv("BAZAARLINK_BASE_URL", "https://api.bazaarlink.ai/v1")
 PREMIUM_IMAGE_MODEL = os.getenv("PREMIUM_IMAGE_MODEL", "dall-e-3")
 STANDARD_IMAGE_MODEL = os.getenv("STANDARD_IMAGE_MODEL", "dall-e-2")
@@ -801,10 +801,10 @@ async def generate_drug_image(req: DrugVisualRequest):
     from sqlalchemy import JSON, Column, Date, DateTime, Integer, String, Text, create_engine
     from sqlalchemy.orm import DeclarativeBase, Session
 
-    if not OPENAI_API_KEY:
+    if not BAZAARLINK_API_KEY:
         raise HTTPException(
             status_code=503,
-            detail="OPENAI_API_KEY belum dikonfigurasi untuk generasi gambar",
+                detail="BAZAARLINK_API_KEY belum dikonfigurasi untuk generasi gambar",
         )
 
     database_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/pharmaidb")
@@ -868,7 +868,7 @@ async def generate_drug_image(req: DrugVisualRequest):
         resp = await client.post(
             f"{BAZAARLINK_BASE_URL.rstrip('/')}/images/generations",
             headers={
-                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Authorization": f"Bearer {BAZAARLINK_API_KEY}",
                 "Content-Type": "application/json",
             },
             json={
