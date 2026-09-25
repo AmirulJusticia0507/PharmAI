@@ -15,6 +15,7 @@ except ImportError:
 import httpx
 import base64
 import json
+from datetime import datetime, timezone
 
 app = FastAPI(title="PharmAI API")
 
@@ -458,3 +459,328 @@ async def analyze_drug_endpoint(req: AnalyzeRequest):
             "confidence": 0.0,
             "raw_response": result,
         }
+
+
+async def _analyze_drug_inline(drug_data: dict) -> dict:
+    has_existing_data = any([
+        drug_data.get("indication"),
+        drug_data.get("benefit"),
+        drug_data.get("dosage"),
+        drug_data.get("usage_time"),
+        drug_data.get("frequency"),
+    ])
+
+    name = drug_data.get("name") or ""
+    generic_name = drug_data.get("generic_name") or ""
+    category = drug_data.get("category") or ""
+    description = drug_data.get("description") or ""
+    dosage_form = drug_data.get("dosage_form") or ""
+    manufacturer = drug_data.get("manufacturer") or ""
+    active_ingredients = drug_data.get("active_ingredients") or []
+    indication = drug_data.get("indication") or ""
+    benefit = drug_data.get("benefit") or ""
+    dosage = drug_data.get("dosage") or ""
+    usage_time = drug_data.get("usage_time") or []
+    frequency = drug_data.get("frequency") or ""
+
+    if has_existing_data:
+        prompt = (
+            f"Berikut adalah data obat yang sudah ada:\n"
+            f"Nama: {name}\n"
+            f"Nama generik: {generic_name}\n"
+            f"Kategori: {category}\n"
+            f"Bentuk sediaan: {dosage_form}\n"
+            f"PRODUSEN: {manufacturer}\n"
+            f"Deskripsi: {description}\n"
+            f"Zat aktif: {', '.join(active_ingredients) if active_ingredients else 'N/A'}\n"
+            f"Indikasi saat ini: {indication or 'kosong'}\n"
+            f"Manfaat saat ini: {benefit or 'kosong'}\n"
+            f"Dosis saat ini: {dosage or 'kosong'}\n"
+            f"Waktu pakai saat ini: {', '.join(usage_time) if usage_time else 'kosong'}\n"
+            f"Frekuensi saat ini: {frequency or 'kosong'}\n\n"
+            f"Berdasarkan data di atas, berikan analisis lengkap penggunaan yang aman dan "
+            f"sesuai petunjuk. Jika ada field yang kosong, lengkapi berdasarkan pengetahuan "
+            f"farmakologi obat tersebut. Jika ada field yang sudah terisi, verifikasi dan "
+            f"pertahankan kesesuaiannya. Kembalikan JSON valid:\n"
+            f'{{"indication": "untuk apa obat ini digunakan", '
+            f'"benefit": "manfaat penggunaan", '
+            f'"dosage": "dosis yang disarankan", '
+            f'"usage_time": ["pagi", "siang", "sore", "malam"], '
+            f'"frequency": "frekuensi penggunaan", '
+            f'"confidence": 0.0-1.0}}'
+        )
+    else:
+        prompt = (
+            f"Berikan analisis penggunaan yang aman dan sesuai petunjuk untuk obat berikut:\n"
+            f"Nama: {name}\n"
+            f"Nama generik: {generic_name}\n"
+            f"Kategori: {category}\n"
+            f"Bentuk sediaan: {dosage_form}\n"
+            f"PRODUSEN: {manufacturer}\n"
+            f"Deskripsi: {description}\n"
+            f"Zat aktif: {', '.join(active_ingredients) if active_ingredients else 'N/A'}\n\n"
+            f"Kembalikan JSON valid dengan field:\n"
+            f'{{"indication": "untuk apa obat ini digunakan", '
+            f'"benefit": "manfaat penggunaan", '
+            f'"dosage": "dosis yang disarankan", '
+            f'"usage_time": ["pagi", "siang", "sore", "malam"], '
+            f'"frequency": "frekuensi penggunaan", '
+            f'"confidence": 0.0-1.0}}\n'
+            f"Jika informasi tidak cukup, gunakan nilai kosong dan confidence rendah. "
+            f"Semua teks dalam Bahasa Indonesia."
+        )
+
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "Anda adalah pakar farmasi Indonesia. Berikan analisis penggunaan obat "
+                "yang akurat, aman, dan mudah dipahami dalam Bahasa Indonesia. "
+                "Selalu kembalikan JSON valid."
+            ),
+        },
+        {"role": "user", "content": prompt},
+    ]
+    result = await chat_completion(messages)
+
+    try:
+        cleaned = result.strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+        return json.loads(cleaned)
+    except Exception:
+        return {
+            "indication": "",
+            "benefit": "",
+            "dosage": "",
+            "usage_time": [],
+            "frequency": "",
+            "confidence": 0.0,
+            "raw_response": result,
+        }
+
+
+_agent_state: dict = {
+    "running": False,
+    "processed": 0,
+    "total": 0,
+    "failed": 0,
+    "current_drug": None,
+    "started_at": None,
+    "last_run": None,
+    "tasks": [],
+}
+
+
+class AgentRunRequest(BaseModel):
+    batch_size: int | None = 5
+
+
+@app.get("/api/agent/status")
+def agent_status():
+    from sqlalchemy import JSON, Column, Date, DateTime, Integer, String, Text, create_engine, or_
+    from sqlalchemy.orm import DeclarativeBase, Session
+
+    database_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/pharmaidb")
+    engine = create_engine(database_url)
+
+    class Base(DeclarativeBase):
+        pass
+
+    class Drug(Base):
+        __tablename__ = "drugs"
+        id = Column(Integer, primary_key=True)
+        name = Column(String(255))
+        generic_name = Column(String(255))
+        category = Column(String(100))
+        description = Column(Text)
+        dosage_form = Column(String(500))
+        indication = Column(Text)
+        benefit = Column(Text)
+        dosage = Column(Text)
+        usage_time = Column(JSON)
+        frequency = Column(String(100))
+        manufacturer = Column(String(255))
+        image_url = Column(String(500))
+        active_ingredients = Column(JSON)
+        registration_number = Column(String(100))
+        registration_status = Column(String(30))
+        registration_expires_at = Column(Date)
+        regulatory_source_url = Column(String(1000))
+        regulatory_checked_at = Column(DateTime)
+        regulatory_notes = Column(Text)
+        source_product_id = Column(String(100))
+        source_application_id = Column(String(50))
+        created_at = Column(DateTime(timezone=True))
+        updated_at = Column(DateTime(timezone=True))
+
+    unanalyzed_filter = or_(
+        Drug.indication.is_(None),
+        Drug.benefit.is_(None),
+        Drug.dosage.is_(None),
+        Drug.usage_time.is_(None),
+        Drug.frequency.is_(None),
+    )
+
+    with Session(engine) as db:
+        unanalyzed_count = db.query(Drug).filter(unanalyzed_filter).count()
+        analyzed_count = db.query(Drug).filter(
+            or_(
+                Drug.indication.is_not(None),
+                Drug.benefit.is_not(None),
+                Drug.dosage.is_not(None),
+            )
+        ).count()
+
+    _agent_state.update({
+        "unanalyzed_count": unanalyzed_count,
+        "analyzed_count": analyzed_count,
+    })
+    return _agent_state
+
+
+@app.post("/api/agent/run")
+async def agent_run(req: AgentRunRequest):
+    from sqlalchemy import JSON, Column, Date, DateTime, Integer, String, Text, create_engine, or_
+    from sqlalchemy.orm import DeclarativeBase, Session
+
+    database_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/pharmaidb")
+    engine = create_engine(database_url)
+
+    class Base(DeclarativeBase):
+        pass
+
+    class Drug(Base):
+        __tablename__ = "drugs"
+        id = Column(Integer, primary_key=True)
+        name = Column(String(255))
+        generic_name = Column(String(255))
+        category = Column(String(100))
+        description = Column(Text)
+        dosage_form = Column(String(500))
+        indication = Column(Text)
+        benefit = Column(Text)
+        dosage = Column(Text)
+        usage_time = Column(JSON)
+        frequency = Column(String(100))
+        manufacturer = Column(String(255))
+        image_url = Column(String(500))
+        active_ingredients = Column(JSON)
+        registration_number = Column(String(100))
+        registration_status = Column(String(30))
+        registration_expires_at = Column(Date)
+        regulatory_source_url = Column(String(1000))
+        regulatory_checked_at = Column(DateTime)
+        regulatory_notes = Column(Text)
+        source_product_id = Column(String(100))
+        source_application_id = Column(String(50))
+        created_at = Column(DateTime(timezone=True))
+        updated_at = Column(DateTime(timezone=True))
+
+    unanalyzed_filter = or_(
+        Drug.indication.is_(None),
+        Drug.benefit.is_(None),
+        Drug.dosage.is_(None),
+        Drug.usage_time.is_(None),
+        Drug.frequency.is_(None),
+    )
+
+    if _agent_state["running"]:
+        return {"status": "already_running", "message": "Agent sudah berjalan"}
+
+    results = []
+
+    with Session(engine) as db:
+        unanalyzed = db.query(Drug).filter(unanalyzed_filter).limit(req.batch_size or 5).all()
+
+        if not unanalyzed:
+            return {
+                "status": "completed",
+                "message": "Semua obat sudah dianalisis",
+                "processed": 0,
+            }
+
+        _agent_state["running"] = True
+        _agent_state["total"] = len(unanalyzed)
+        _agent_state["processed"] = 0
+        _agent_state["failed"] = 0
+        _agent_state["started_at"] = datetime.now(timezone.utc).isoformat()
+        _agent_state["current_drug"] = None
+
+        for drug in unanalyzed:
+            try:
+                _agent_state["current_drug"] = {"id": drug.id, "name": drug.name}
+
+                drug_data = {
+                    "name": drug.name,
+                    "generic_name": drug.generic_name,
+                    "category": drug.category,
+                    "description": drug.description,
+                    "dosage_form": drug.dosage_form,
+                    "manufacturer": drug.manufacturer,
+                    "indication": drug.indication,
+                    "benefit": drug.benefit,
+                    "dosage": drug.dosage,
+                    "usage_time": drug.usage_time or [],
+                    "frequency": drug.frequency,
+                    "active_ingredients": drug.active_ingredients or [],
+                }
+
+                analysis = await _analyze_drug_inline(drug_data)
+
+                drug.indication = analysis.get("indication") or drug.indication
+                drug.benefit = analysis.get("benefit") or drug.benefit
+                drug.dosage = analysis.get("dosage") or drug.dosage
+                if analysis.get("usage_time") and len(analysis["usage_time"]) > 0:
+                    drug.usage_time = analysis["usage_time"]
+                if analysis.get("frequency"):
+                    drug.frequency = analysis["frequency"]
+
+                db.commit()
+                _agent_state["processed"] += 1
+                results.append({
+                    "drug_id": drug.id,
+                    "name": drug.name,
+                    "status": "success",
+                    "confidence": analysis.get("confidence", 0),
+                })
+
+            except Exception as e:
+                db.rollback()
+                _agent_state["failed"] += 1
+                results.append({
+                    "drug_id": drug.id,
+                    "name": drug.name,
+                    "status": "failed",
+                    "error": str(e),
+                })
+
+    _agent_state["running"] = False
+    _agent_state["current_drug"] = None
+    _agent_state["last_run"] = datetime.now(timezone.utc).isoformat()
+    _agent_state["tasks"] = results
+    return {
+        "status": "completed",
+        "batch_size": req.batch_size or 5,
+        "processed": _agent_state["processed"],
+        "failed": _agent_state["failed"],
+        "results": results,
+    }
+
+
+@app.get("/api/agent/tasks")
+def agent_tasks():
+    return {
+        "running": _agent_state["running"],
+        "tasks": _agent_state["tasks"],
+        "processed": _agent_state["processed"],
+        "failed": _agent_state["failed"],
+        "total": _agent_state["total"],
+        "last_run": _agent_state["last_run"],
+    }
+
+
+@app.get("/api/agent/tasks/clear")
+def agent_clear_tasks():
+    _agent_state["tasks"] = []
+    return {"status": "cleared", "tasks": []}
