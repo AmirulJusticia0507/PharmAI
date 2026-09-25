@@ -1,9 +1,16 @@
 from fastapi import FastAPI, UploadFile, File, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from dotenv import load_dotenv
+import os
+from pathlib import Path
+
+_env_backend = Path(__file__).resolve().parents[1] / "backend"
+load_dotenv(_env_backend / ".env")
+load_dotenv(_env_backend / ".env.local", override=True)
+
 import httpx
 import base64
-import os
 import json
 
 app = FastAPI(title="PharmAI API")

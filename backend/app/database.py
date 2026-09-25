@@ -4,7 +4,9 @@ from dotenv import load_dotenv
 from pathlib import Path
 import os
 
-load_dotenv(Path(__file__).resolve().parents[1] / ".env.local")
+_backend_dir = Path(__file__).resolve().parents[1]
+load_dotenv(_backend_dir / ".env")
+load_dotenv(_backend_dir / ".env.local", override=True)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/pharmaidb")
 
