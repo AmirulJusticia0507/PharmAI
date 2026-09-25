@@ -151,3 +151,97 @@ async def check_drug_interactions(drug_names: list[str]) -> dict:
         return json.loads(cleaned)
     except Exception:
         return {"summary": result, "interactions": [], "overall_safety": "unknown"}
+
+
+async def analyze_drug(drug_data: dict) -> dict:
+    name = drug_data.get("name") or ""
+    generic_name = drug_data.get("generic_name") or ""
+    category = drug_data.get("category") or ""
+    description = drug_data.get("description") or ""
+    dosage_form = drug_data.get("dosage_form") or ""
+    manufacturer = drug_data.get("manufacturer") or ""
+    indication = drug_data.get("indication") or ""
+    benefit = drug_data.get("benefit") or ""
+    dosage = drug_data.get("dosage") or ""
+    usage_time = drug_data.get("usage_time") or []
+    frequency = drug_data.get("frequency") or ""
+    active_ingredients = drug_data.get("active_ingredients") or []
+
+    has_existing_data = any([indication, benefit, dosage, usage_time, frequency])
+
+    if has_existing_data:
+        prompt = (
+            f"Berikut adalah data obat yang sudah ada:\n"
+            f"Nama: {name}\n"
+            f"Nama generik: {generic_name}\n"
+            f"Kategori: {category}\n"
+            f"Bentuk sediaan: {dosage_form}\n"
+            f"PRODUSEN: {manufacturer}\n"
+            f"Deskripsi: {description}\n"
+            f"Zat aktif: {', '.join(active_ingredients) if active_ingredients else 'N/A'}\n"
+            f"Indikasi saat ini: {indication or 'kosong'}\n"
+            f"Manfaat saat ini: {benefit or 'kosong'}\n"
+            f"Dosis saat ini: {dosage or 'kosong'}\n"
+            f"Waktu pakai saat ini: {', '.join(usage_time) if usage_time else 'kosong'}\n"
+            f"Frekuensi saat ini: {frequency or 'kosong'}\n\n"
+            f"Berdasarkan data di atas, berikan analisis lengkap penggunaan yang aman dan "
+            f"sesuai petunjuk. Jika ada field yang kosong, lengkapi berdasarkan pengetahuan "
+            f"farmakologi obat tersebut. Jika ada field yang sudah terisi, verifikasi dan "
+            f"pertahankan kesesuaiannya. Kembalikan JSON valid:\n"
+            f'{{"indication": "untuk apa obat ini digunakan", '
+            f'"benefit": "manfaat penggunaan", '
+            f'"dosage": "dosis yang disarankan", '
+            f'"usage_time": ["pagi", "siang", "sore", "malam"], '
+            f'"frequency": "frekuensi penggunaan", '
+            f'"confidence": 0.0-1.0}}'
+        )
+    else:
+        prompt = (
+            f"Berikan analisis penggunaan yang aman dan sesuai petunjuk untuk obat berikut:\n"
+            f"Nama: {name}\n"
+            f"Nama generik: {generic_name}\n"
+            f"Kategori: {category}\n"
+            f"Bentuk sediaan: {dosage_form}\n"
+            f"PRODUSEN: {manufacturer}\n"
+            f"Deskripsi: {description}\n"
+            f"Zat aktif: {', '.join(active_ingredients) if active_ingredients else 'N/A'}\n\n"
+            f"Kembalikan JSON valid dengan field:\n"
+            f'{{"indication": "untuk apa obat ini digunakan", '
+            f'"benefit": "manfaat penggunaan", '
+            f'"dosage": "dosis yang disarankan", '
+            f'"usage_time": ["pagi", "siang", "sore", "malam"], '
+            f'"frequency": "frekuensi penggunaan", '
+            f'"confidence": 0.0-1.0}}\n'
+            f"Jika informasi tidak cukup, gunakan nilai kosong dan confidence rendah. "
+            f"Semua teks dalam Bahasa Indonesia."
+        )
+
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "Anda adalah pakar farmasi Indonesia. Berikan analisis penggunaan obat "
+                "yang akurat, aman, dan mudah dipahami dalam Bahasa Indonesia. "
+                "Selalu kembalikan JSON valid."
+            ),
+        },
+        {"role": "user", "content": prompt},
+    ]
+    result = await chat_completion(messages)
+    import json
+
+    try:
+        cleaned = result.strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+        return json.loads(cleaned)
+    except Exception:
+        return {
+            "indication": "",
+            "benefit": "",
+            "dosage": "",
+            "usage_time": [],
+            "frequency": "",
+            "confidence": 0.0,
+            "raw_response": result,
+        }

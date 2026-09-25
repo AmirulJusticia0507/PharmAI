@@ -11,7 +11,7 @@ class DrugBase(BaseModel):
     indication: str | None = None
     benefit: str | None = None
     dosage: str | None = None
-    usage_time: list[str] = Field(default_factory=list)
+    usage_time: list[str] | None = None
     frequency: str | None = None
     manufacturer: str | None = None
     image_url: str | None = None

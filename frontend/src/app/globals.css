@@ -1858,12 +1858,153 @@ html[data-theme="dark"] input {
     letter-spacing: 1px;
 }
 
-.drug-card-mark {
+  .drug-card-mark {
     color: #91aa33;
     font-size: 14px;
-}
+  }
 
-.drug-skeleton {
+  .drug-generate-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-right: 8px;
+    padding: 0;
+    border: 1px solid #cbd4c8;
+    border-radius: 6px;
+    background: #f8faf7;
+    color: #5a7350;
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .drug-generate-btn:hover {
+    background: #e8f0e8;
+    border-color: #91aa33;
+    color: #3d612a;
+  }
+
+  .drug-generate-btn:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+
+  .analysis-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+  }
+
+  .analysis-modal {
+    background: #ffffff;
+    border-radius: 12px;
+    max-width: 520px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+  }
+
+  .analysis-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid #e4ebe2;
+  }
+
+  .analysis-header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #2d3a2d;
+  }
+
+  .analysis-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: #8a9a8a;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .analysis-close:hover {
+    color: #2d3a2d;
+  }
+
+  .analysis-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 22px;
+  }
+
+  .spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid #e4ebe2;
+    border-top-color: #91aa33;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .analysis-content {
+    padding: 18px 22px;
+  }
+
+  .analysis-field {
+    margin-bottom: 14px;
+  }
+
+  .analysis-field b {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #8a9a8a;
+    margin-bottom: 4px;
+  }
+
+  .analysis-field p {
+    margin: 0;
+    font-size: 14px;
+    color: #2d3a2d;
+    line-height: 1.5;
+  }
+
+  .analysis-confidence {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #e4ebe2;
+    font-size: 13px;
+    color: #5a7350;
+  }
+
+  .drug-skeleton {
     height: 294px;
     background: linear-gradient(100deg, #e4ebe2 30%, #f1f5ed 50%, #e4ebe2 70%);
     background-size: 200% 100%;

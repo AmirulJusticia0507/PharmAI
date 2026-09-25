@@ -294,7 +294,7 @@ def get_drug(drug_id: int):
         created_at = Column(DateTime)
         updated_at = Column(DateTime)
 
-    with Session(engine) as db:
+     with Session(engine) as db:
         drug = db.query(Drug).filter(Drug.id == drug_id).first()
         if not drug:
             raise HTTPException(status_code=404, detail="Drug not found")
@@ -313,4 +313,145 @@ def get_drug(drug_id: int):
             "regulatory_notes": drug.regulatory_notes,
             "source_product_id": drug.source_product_id,
             "source_application_id": drug.source_application_id,
+        }
+
+
+class AnalyzeRequest(BaseModel):
+    drug_id: int
+
+
+@app.post("/api/ai/analyze-drug")
+async def analyze_drug_endpoint(req: AnalyzeRequest):
+    from sqlalchemy import JSON, Column, Date, DateTime, Integer, String, Text, create_engine
+    from sqlalchemy.orm import DeclarativeBase, Session
+
+    database_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/pharmaidb")
+    engine = create_engine(database_url)
+
+    class Base(DeclarativeBase):
+        pass
+
+    class Drug(Base):
+        __tablename__ = "drugs"
+        id = Column(Integer, primary_key=True)
+        name = Column(String(255))
+        generic_name = Column(String(255))
+        category = Column(String(100))
+        description = Column(Text)
+        dosage_form = Column(String(500))
+        indication = Column(Text)
+        benefit = Column(Text)
+        dosage = Column(Text)
+        usage_time = Column(JSON)
+        frequency = Column(String(100))
+        manufacturer = Column(String(255))
+        image_url = Column(String(500))
+        active_ingredients = Column(JSON)
+        registration_number = Column(String(100))
+        registration_status = Column(String(30))
+        registration_expires_at = Column(Date)
+        regulatory_source_url = Column(String(1000))
+        regulatory_checked_at = Column(DateTime)
+        regulatory_notes = Column(Text)
+        source_product_id = Column(String(100))
+        source_application_id = Column(String(50))
+        created_at = Column(DateTime)
+        updated_at = Column(DateTime)
+
+    with Session(engine) as db:
+        drug = db.query(Drug).filter(Drug.id == req.drug_id).first()
+        if not drug:
+            raise HTTPException(status_code=404, detail="Drug not found")
+        drug_data = {
+            "name": drug.name,
+            "generic_name": drug.generic_name,
+            "category": drug.category,
+            "description": drug.description,
+            "dosage_form": drug.dosage_form,
+            "manufacturer": drug.manufacturer,
+            "indication": drug.indication,
+            "benefit": drug.benefit,
+            "dosage": drug.dosage,
+            "usage_time": drug.usage_time or [],
+            "frequency": drug.frequency,
+            "active_ingredients": drug.active_ingredients or [],
+        }
+
+    has_existing = any([
+        drug_data["indication"], drug_data["benefit"],
+        drug_data["dosage"], drug_data["usage_time"], drug_data["frequency"],
+    ])
+
+    if has_existing:
+        prompt = (
+            f"Berikut adalah data obat yang sudah ada:\n"
+            f"Nama: {drug_data['name']}\n"
+            f"Nama generik: {drug_data['generic_name'] or ''}\n"
+            f"Kategori: {drug_data['category'] or ''}\n"
+            f"Bentuk sediaan: {drug_data['dosage_form'] or ''}\n"
+            f"PRODUSEN: {drug_data['manufacturer'] or ''}\n"
+            f"Deskripsi: {drug_data['description'] or ''}\n"
+            f"Zat aktif: {', '.join(drug_data['active_ingredients']) if drug_data['active_ingredients'] else 'N/A'}\n"
+            f"Indikasi saat ini: {drug_data['indication'] or 'kosong'}\n"
+            f"Manfaat saat ini: {drug_data['benefit'] or 'kosong'}\n"
+            f"Dosis saat ini: {drug_data['dosage'] or 'kosong'}\n"
+            f"Waktu pakai saat ini: {', '.join(drug_data['usage_time']) if drug_data['usage_time'] else 'kosong'}\n"
+            f"Frekuensi saat ini: {drug_data['frequency'] or 'kosong'}\n\n"
+            f"Berdasarkan data di atas, berikan analisis lengkap penggunaan yang aman dan "
+            f"sesuai petunjuk. Jika ada field yang kosong, lengkapi berdasarkan pengetahuan "
+            f"farmakologi obat tersebut. Jika ada field yang sudah terisi, verifikasi dan "
+            f"pertahankan kesesuaiannya. Kembalikan JSON valid:\n"
+            f'{{"indication": "untuk apa obat ini digunakan", '
+            f'"benefit": "manfaat penggunaan", '
+            f'"dosage": "dosis yang disarankan", '
+            f'"usage_time": ["pagi", "siang", "sore", "malam"], '
+            f'"frequency": "frekuensi penggunaan", '
+            f'"confidence": 0.0-1.0}}'
+        )
+    else:
+        prompt = (
+            f"Berikan analisis penggunaan yang aman dan sesuai petunjuk untuk obat berikut:\n"
+            f"Nama: {drug_data['name']}\n"
+            f"Nama generik: {drug_data['generic_name'] or ''}\n"
+            f"Kategori: {drug_data['category'] or ''}\n"
+            f"Bentuk sediaan: {drug_data['dosage_form'] or ''}\n"
+            f"PRODUSEN: {drug_data['manufacturer'] or ''}\n"
+            f"Deskripsi: {drug_data['description'] or ''}\n"
+            f"Zat aktif: {', '.join(drug_data['active_ingredients']) if drug_data['active_ingredients'] else 'N/A'}\n\n"
+            f"Kembalikan JSON valid dengan field:\n"
+            f'{{"indication": "untuk apa obat ini digunakan", '
+            f'"benefit": "manfaat penggunaan", '
+            f'"dosage": "dosis yang disarankan", '
+            f'"usage_time": ["pagi", "siang", "sore", "malam"], '
+            f'"frequency": "frekuensi penggunaan", '
+            f'"confidence": 0.0-1.0}}\n'
+            f"Jika informasi tidak cukup, gunakan nilai kosong dan confidence rendah. "
+            f"Semua teks dalam Bahasa Indonesia."
+        )
+
+    messages = [
+        {"role": "system", "content": (
+            "Anda adalah pakar farmasi Indonesia. Berikan analisis penggunaan obat "
+            "yang akurat, aman, dan mudah dipahami dalam Bahasa Indonesia. "
+            "Selalu kembalikan JSON valid."
+        )},
+        {"role": "user", "content": prompt},
+    ]
+    result = await chat_completion(messages)
+    import json
+
+    try:
+        cleaned = result.strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+        return json.loads(cleaned)
+    except Exception:
+        return {
+            "indication": "",
+            "benefit": "",
+            "dosage": "",
+            "usage_time": [],
+            "frequency": "",
+            "confidence": 0.0,
+            "raw_response": result,
         }

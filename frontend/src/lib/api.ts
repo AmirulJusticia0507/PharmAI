@@ -10,7 +10,7 @@ export interface Drug {
   indication: string | null;
   benefit: string | null;
   dosage: string | null;
-  usage_time: string[];
+  usage_time: string[] | null;
   frequency: string | null;
   manufacturer: string | null;
   image_url: string | null;
@@ -66,5 +66,24 @@ export async function createDrug(data: Partial<Drug>): Promise<Drug> {
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Gagal membuat data obat");
+  return res.json();
+}
+
+export interface DrugAnalysis {
+  indication: string;
+  benefit: string;
+  dosage: string;
+  usage_time: string[];
+  frequency: string;
+  confidence: number;
+}
+
+export async function fetchDrugAnalysis(drugId: number): Promise<DrugAnalysis> {
+  const res = await fetch(`${API_BASE}/api/ai/analyze-drug`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ drug_id: drugId }),
+  });
+  if (!res.ok) throw new Error("Gagal menganalisis obat");
   return res.json();
 }
