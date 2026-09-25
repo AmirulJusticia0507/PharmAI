@@ -154,7 +154,7 @@ export default function DrugsPage() {
           <div className="analysis-overlay" onClick={closeImage}>
             <div className="analysis-modal" onClick={(e) => e.stopPropagation()}>
               <div className="analysis-header">
-                <h3>Gambar Obat</h3>
+                <h3>Ilustrasi AI Obat</h3>
                 <button type="button" className="analysis-close" onClick={closeImage} aria-label="Tutup">✕</button>
               </div>
               <div className="analysis-content">
@@ -165,6 +165,9 @@ export default function DrugsPage() {
                       alt="Visualisasi obat yang dihasilkan"
                       style={{ width: "100%", borderRadius: "8px", maxHeight: "480px", objectFit: "contain" }}
                     />
+                    <p style={{ fontSize: "0.8rem", color: "#666", marginTop: "0.5rem" }}>
+                      Ilustrasi AI, bukan foto produk atau acuan identifikasi obat.
+                    </p>
                     {imageResult.revised_prompt && (
                       <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.5rem" }}>
                         {imageResult.revised_prompt}

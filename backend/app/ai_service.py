@@ -9,10 +9,14 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 AI_MODEL = os.getenv("AI_MODEL", "openai/gpt-4o-mini")
 
-BAZAARLINK_API_KEY = os.getenv("BAZAARLINK_API_KEY", "")
-BAZAARLINK_BASE_URL = os.getenv("BAZAARLINK_BASE_URL", "https://api.bazaarlink.ai/v1")
-PREMIUM_IMAGE_MODEL = os.getenv("PREMIUM_IMAGE_MODEL", "dall-e-3")
-STANDARD_IMAGE_MODEL = os.getenv("STANDARD_IMAGE_MODEL", "dall-e-2")
+CLOUDFLARE_ACCOUNT_ID = os.getenv("CLOUDFLARE_ACCOUNT_ID", "")
+CLOUDFLARE_API_TOKEN = os.getenv("CLOUDFLARE_API_TOKEN", "")
+PREMIUM_IMAGE_MODEL = os.getenv(
+    "PREMIUM_IMAGE_MODEL", "@cf/black-forest-labs/flux-1-schnell"
+)
+STANDARD_IMAGE_MODEL = os.getenv(
+    "STANDARD_IMAGE_MODEL", "@cf/black-forest-labs/flux-1-schnell"
+)
 
 
 async def chat_completion(messages: list[dict], model: str | None = None) -> str:
@@ -253,8 +257,8 @@ async def analyze_drug(drug_data: dict) -> dict:
 
 
 async def generate_drug_visual(drug_data: dict, use_premium: bool = False) -> dict:
-    if not BAZAARLINK_API_KEY:
-        raise ValueError("BAZAARLINK_API_KEY belum dikonfigurasi untuk generasi gambar")
+    if not CLOUDFLARE_ACCOUNT_ID or not CLOUDFLARE_API_TOKEN:
+        raise ValueError("Cloudflare Workers AI belum dikonfigurasi untuk generasi gambar")
 
     name = drug_data.get("name") or ""
     generic_name = drug_data.get("generic_name") or ""
@@ -285,30 +289,32 @@ async def generate_drug_visual(drug_data: dict, use_premium: bool = False) -> di
     )
 
     model = PREMIUM_IMAGE_MODEL if use_premium else STANDARD_IMAGE_MODEL
+    image_api_url = (
+        f"https://api.cloudflare.com/client/v4/accounts/{CLOUDFLARE_ACCOUNT_ID}"
+        f"/ai/run/{model}"
+    )
 
     async with httpx.AsyncClient(timeout=60) as client:
         resp = await client.post(
-            f"{BAZAARLINK_BASE_URL}/images/generations",
+            image_api_url,
             headers={
-                "Authorization": f"Bearer {BAZAARLINK_API_KEY}",
+                "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
                 "Content-Type": "application/json",
             },
-            json={
-                "model": model,
-                "prompt": prompt,
-                "n": 1,
-                "size": "1024x1024",
-            },
+            json={"prompt": prompt, "steps": 4},
         )
         resp.raise_for_status()
         data = resp.json()
 
-    image_url = data.get("data", [{}])[0].get("url", "")
-    revised_prompt = data.get("data", [{}])[0].get("revised_prompt", "")
+    image_data = (data.get("result") or {}).get("image", "")
+    if not image_data:
+        raise ValueError("Cloudflare Workers AI tidak mengembalikan data gambar")
+
+    image_url = f"data:image/jpeg;base64,{image_data}"
 
     return {
         "image_url": image_url,
-        "revised_prompt": revised_prompt,
+        "revised_prompt": prompt,
         "model": model,
         "premium": use_premium,
     }

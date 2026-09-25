@@ -33,10 +33,14 @@ OMNIROUTE_API_KEY = os.getenv("OMNIROUTE_API_KEY", "")
 OMNIROUTE_BASE_URL = os.getenv("OMNIROUTE_BASE_URL", "")
 AI_MODEL = os.getenv("AI_MODEL", "openai/gpt-4o-mini")
 
-BAZAARLINK_API_KEY = os.getenv("BAZAARLINK_API_KEY", "")
-BAZAARLINK_BASE_URL = os.getenv("BAZAARLINK_BASE_URL", "https://api.bazaarlink.ai/v1")
-PREMIUM_IMAGE_MODEL = os.getenv("PREMIUM_IMAGE_MODEL", "dall-e-3")
-STANDARD_IMAGE_MODEL = os.getenv("STANDARD_IMAGE_MODEL", "dall-e-2")
+CLOUDFLARE_ACCOUNT_ID = os.getenv("CLOUDFLARE_ACCOUNT_ID", "")
+CLOUDFLARE_API_TOKEN = os.getenv("CLOUDFLARE_API_TOKEN", "")
+PREMIUM_IMAGE_MODEL = os.getenv(
+    "PREMIUM_IMAGE_MODEL", "@cf/black-forest-labs/flux-1-schnell"
+)
+STANDARD_IMAGE_MODEL = os.getenv(
+    "STANDARD_IMAGE_MODEL", "@cf/black-forest-labs/flux-1-schnell"
+)
 
 
 async def chat_completion(messages: list[dict], model: str | None = None) -> str:
@@ -801,10 +805,10 @@ async def generate_drug_image(req: DrugVisualRequest):
     from sqlalchemy import JSON, Column, Date, DateTime, Integer, String, Text, create_engine
     from sqlalchemy.orm import DeclarativeBase, Session
 
-    if not BAZAARLINK_API_KEY:
+    if not CLOUDFLARE_ACCOUNT_ID or not CLOUDFLARE_API_TOKEN:
         raise HTTPException(
             status_code=503,
-                detail="BAZAARLINK_API_KEY belum dikonfigurasi untuk generasi gambar",
+            detail="Cloudflare Workers AI belum dikonfigurasi untuk generasi gambar",
         )
 
     database_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/pharmaidb")
@@ -863,20 +867,19 @@ async def generate_drug_image(req: DrugVisualRequest):
     )
 
     model = PREMIUM_IMAGE_MODEL if req.use_premium else STANDARD_IMAGE_MODEL
+    image_api_url = (
+        f"https://api.cloudflare.com/client/v4/accounts/{CLOUDFLARE_ACCOUNT_ID}"
+        f"/ai/run/{model}"
+    )
 
     async with httpx.AsyncClient(timeout=60) as client:
         resp = await client.post(
-            f"{BAZAARLINK_BASE_URL.rstrip('/')}/images/generations",
+            image_api_url,
             headers={
-                "Authorization": f"Bearer {BAZAARLINK_API_KEY}",
+                "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
                 "Content-Type": "application/json",
             },
-            json={
-                "model": model,
-                "prompt": prompt,
-                "n": 1,
-                "size": "1024x1024",
-            },
+            json={"prompt": prompt, "steps": 4},
         )
         if not resp.is_success:
             try:
@@ -889,12 +892,17 @@ async def generate_drug_image(req: DrugVisualRequest):
             )
         data = resp.json()
 
-    image_url = data.get("data", [{}])[0].get("url", "")
-    revised_prompt = data.get("data", [{}])[0].get("revised_prompt", "")
+    image_data = (data.get("result") or {}).get("image", "")
+    if not image_data:
+        raise HTTPException(
+            status_code=502,
+            detail="Cloudflare Workers AI tidak mengembalikan data gambar",
+        )
+    image_url = f"data:image/jpeg;base64,{image_data}"
 
     return {
         "image_url": image_url,
-        "revised_prompt": revised_prompt,
+        "revised_prompt": prompt,
         "model": model,
         "premium": req.use_premium,
     }
