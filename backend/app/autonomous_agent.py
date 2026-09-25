@@ -6,9 +6,9 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import or_, func
-from ..ai_service import analyze_drug
-from ..database import SessionLocal
-from ..models import Drug
+from .ai_service import analyze_drug
+from .database import SessionLocal
+from .models import Drug
 
 _STATE_FILE = Path(__file__).resolve().parent.parent / ".agent_state.json"
 
