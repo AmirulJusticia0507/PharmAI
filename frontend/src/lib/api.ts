@@ -7,6 +7,11 @@ export interface Drug {
   category: string | null;
   description: string | null;
   dosage_form: string | null;
+  indication: string | null;
+  benefit: string | null;
+  dosage: string | null;
+  usage_time: string[];
+  frequency: string | null;
   manufacturer: string | null;
   image_url: string | null;
   active_ingredients: string[];

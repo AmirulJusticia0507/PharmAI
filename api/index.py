@@ -187,6 +187,11 @@ def list_drugs(
         category = Column(String(100))
         description = Column(Text)
         dosage_form = Column(String(500))
+        indication = Column(Text)
+        benefit = Column(Text)
+        dosage = Column(Text)
+        usage_time = Column(JSON)
+        frequency = Column(String(100))
         manufacturer = Column(String(255))
         image_url = Column(String(500))
         active_ingredients = Column(JSON)
@@ -211,6 +216,8 @@ def list_drugs(
                 "id": d.id, "name": d.name, "generic_name": d.generic_name,
                 "category": d.category, "description": d.description,
                 "dosage_form": d.dosage_form, "manufacturer": d.manufacturer,
+                "indication": d.indication, "benefit": d.benefit, "dosage": d.dosage,
+                "usage_time": d.usage_time or [], "frequency": d.frequency,
                 "image_url": d.image_url, "active_ingredients": d.active_ingredients or [],
                 "registration_number": d.registration_number,
                 "registration_status": d.registration_status or "unverified",
@@ -261,6 +268,11 @@ def get_drug(drug_id: int):
         category = Column(String(100))
         description = Column(Text)
         dosage_form = Column(String(500))
+        indication = Column(Text)
+        benefit = Column(Text)
+        dosage = Column(Text)
+        usage_time = Column(JSON)
+        frequency = Column(String(100))
         manufacturer = Column(String(255))
         image_url = Column(String(500))
         active_ingredients = Column(JSON)
@@ -283,6 +295,8 @@ def get_drug(drug_id: int):
             "id": drug.id, "name": drug.name, "generic_name": drug.generic_name,
             "category": drug.category, "description": drug.description,
             "dosage_form": drug.dosage_form, "manufacturer": drug.manufacturer,
+            "indication": drug.indication, "benefit": drug.benefit, "dosage": drug.dosage,
+            "usage_time": drug.usage_time or [], "frequency": drug.frequency,
             "image_url": drug.image_url, "active_ingredients": drug.active_ingredients or [],
             "registration_number": drug.registration_number,
             "registration_status": drug.registration_status or "unverified",

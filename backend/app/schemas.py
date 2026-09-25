@@ -8,6 +8,11 @@ class DrugBase(BaseModel):
     category: str | None = None
     description: str | None = None
     dosage_form: str | None = None
+    indication: str | None = None
+    benefit: str | None = None
+    dosage: str | None = None
+    usage_time: list[str] = Field(default_factory=list)
+    frequency: str | None = None
     manufacturer: str | None = None
     image_url: str | None = None
     active_ingredients: list[str] = Field(default_factory=list)

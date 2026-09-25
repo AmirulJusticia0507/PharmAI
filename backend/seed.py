@@ -712,6 +712,489 @@ NEW_DRUGS = [
 # Append new drugs to existing list
 drugs_data.extend(NEW_DRUGS)
 
+USAGE_GUIDES = [
+    {
+        "match": ["Paracetamol"],
+        "indication": "Demam dan nyeri ringan sampai sedang: sakit kepala, nyeri otot, nyeri haid, sakit gigi, dan nyeri setelah cedera.",
+        "benefit": "Menurunkan demam dan meredakan nyeri dengan lambung lebih aman dibanding NSAID.",
+        "dosage": "Dewasa: 500-1.000 mg per dosis, maksimal 4.000 mg per hari. Anak disesuaikan dengan berat badan.",
+        "usage_time": ["pagi", "siang", "sore", "malam"],
+        "frequency": "3-4x sehari",
+    },
+    {
+        "match": ["Ibuprofen"],
+        "indication": "Nyeri dan peradangan: sakit gigi, nyeri haid, sakit kepala, pegal linu, dan nyeri sendi.",
+        "benefit": "Meredakan sekaligus mengurangi peradangan, diminum sesudah makan untuk menjaga lambung.",
+        "dosage": "Dewasa: 200-400 mg per dosis sesudah makan, maksimal 1.200 mg per hari.",
+        "usage_time": ["pagi", "siang", "sore", "malam"],
+        "frequency": "3x sehari",
+    },
+    {
+        "match": ["Asam Mefenamat", "Mefenamic Acid"],
+        "indication": "Nyeri haid, nyeri otot, nyeri gigi, dan nyeri ringan lainnya.",
+        "benefit": "Pereda nyeri dan anti radang yang efektif untuk nyeri haid, maksimal dipakai 5 hari.",
+        "dosage": "500 mg per dosis sesudah makan, jangan melebihi 5 hari pemakaian.",
+        "usage_time": ["pagi", "siang", "sore"],
+        "frequency": "3x sehari",
+    },
+    {
+        "match": ["Diclofenac"],
+        "indication": "Nyeri sendi, nyeri otot, nyeri punggung, dan peradangan pasca cedera.",
+        "benefit": "Meredakan nyeri berat dan peradangan pada sistem gerak tubuh.",
+        "dosage": "50 mg per dosis sesudah makan, maksimal 150 mg per hari.",
+        "usage_time": ["pagi", "siang", "sore"],
+        "frequency": "3x sehari",
+    },
+    {
+        "match": ["Naproxen"],
+        "indication": "Nyeri sendi, encok (asam urat), nyeri otot, dan nyeri haid.",
+        "benefit": "Khasiatnya panjang sehingga cukup diminum 2 kali sehari.",
+        "dosage": "250-500 mg per dosis sesudah makan.",
+        "usage_time": ["pagi", "malam"],
+        "frequency": "2x sehari",
+    },
+    {
+        "match": ["Aspirin"],
+        "indication": "Pencegahan stroke dan serangan jantung pada pasien berisiko tinggi (dosis rendah).",
+        "benefit": "Mencegah penggumpalan darah sehingga aliran darah ke jantung dan otak tetap lancar.",
+        "dosage": "100 mg per hari sesudah makan, hanya atas anjuran dokter.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Amoxicillin"],
+        "indication": "Infeksi bakteri: saluran napas, telinga, kulit, gigi, dan saluran kemih.",
+        "benefit": "Membunuh bakteri penyebab infeksi; habiskan seluruh dosis agar bakteri tidak kebal.",
+        "dosage": "500 mg per dosis, durasi 7-10 hari sesuai anjuran dokter.",
+        "usage_time": ["pagi", "siang", "sore"],
+        "frequency": "3x sehari",
+    },
+    {
+        "match": ["Azitromisin", "Azithromycin"],
+        "indication": "Infeksi bakteri saluran napas, tenggorokan, dan kulit.",
+        "benefit": "Durasi terapi lebih singkat karena obat bertahan lama di dalam tubuh.",
+        "dosage": "500 mg per hari sesudah makan, umumnya 3-5 hari.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Ciprofloxacin"],
+        "indication": "Infeksi saluran kemih, infeksi kulit, dan infeksi usus bakteri.",
+        "benefit": "Antibiotik spektrum luas untuk infeksi yang tidak merespons antibiotik biasa.",
+        "dosage": "500 mg per dosis sesudah makan, umumnya 7-14 hari.",
+        "usage_time": ["pagi", "malam"],
+        "frequency": "2x sehari",
+    },
+    {
+        "match": ["Cefadroxil"],
+        "indication": "Infeksi kulit, saluran kemih, dan saluran napas akibat bakteri.",
+        "benefit": "Antibiotik sefalosporin yang tersedia dalam bentuk kapsul dan sirup anak.",
+        "dosage": "500 mg per dosis, umumnya 7-10 hari.",
+        "usage_time": ["pagi", "malam"],
+        "frequency": "2x sehari",
+    },
+    {
+        "match": ["Metronidazol", "Metronidazole"],
+        "indication": "Infeksi bakteri anaerob, amebiasis (disentri), dan giardiasis (mencret parasit).",
+        "benefit": "Membunuh parasit dan bakteri anaerob penyebab infeksi usus dan gigi.",
+        "dosage": "500 mg per dosis sesudah makan, umumnya 7 hari. Hindari alkohol selama pengobatan.",
+        "usage_time": ["pagi", "siang", "sore"],
+        "frequency": "3x sehari",
+    },
+    {
+        "match": ["Omeprazol", "Omeprazole"],
+        "indication": "Maag, radang lambung, dan GERD (naiknya asam lambung ke kerongkongan).",
+        "benefit": "Menurunkan produksi asam lambung sehingga nyeri dan luka lambung membaik.",
+        "dosage": "20 mg per hari, diminum 30 menit sebelum sarapan.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Lansoprazol", "Lansoprazole"],
+        "indication": "Maag, tukak lambung, dan GERD.",
+        "benefit": "Mengurangi asam lambung dengan dosis sekali sehari sebelum makan.",
+        "dosage": "30 mg per hari, diminum 30 menit sebelum makan.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Pantoprazol", "Pantoprazole"],
+        "indication": "Maag dan GERD, termasuk pengobatan jangka panjang.",
+        "benefit": "Menstabilkan asam lambung dengan interaksi obat yang minim.",
+        "dosage": "40 mg per hari, diminum sebelum makan pagi.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Famotidin", "Famotidine"],
+        "indication": "Maag ringan, kembung, dan peningkatan asam lambung.",
+        "benefit": "Merilekskan lambung lebih cepat daripada antasida tablet.",
+        "dosage": "20 mg per dosis 30 menit sebelum makan.",
+        "usage_time": ["pagi", "malam"],
+        "frequency": "2x sehari",
+    },
+    {
+        "match": ["Antasida", "Hydrotalcite", "Aluminum Hydroxide", "Magnesium Hydroxide"],
+        "indication": "Maag ringan, perih lambung, dan kembung setelah makan.",
+        "benefit": "Menetralkan asam lambung langsung di tempat, merasa lega dalam hitungan menit.",
+        "dosage": "1-2 tablet dikunyah perlahan setelah makan dan sebelum tidur.",
+        "usage_time": ["siang", "malam"],
+        "frequency": "2-3x sehari",
+    },
+    {
+        "match": ["Domperidon", "Domperidone"],
+        "indication": "Mual, muntah, kembung, dan lambung terasa cepat penuh.",
+        "benefit": "Membuat lambung kosong lebih cepat sehingga mual mereda.",
+        "dosage": "10 mg per dosis 30 menit sebelum makan, maksimal 14 hari.",
+        "usage_time": ["pagi", "siang", "sore"],
+        "frequency": "3x sehari",
+    },
+    {
+        "match": ["Ondansetron"],
+        "indication": "Mual dan muntah berat, termasuk akibat kemoterapi dan pasca operasi.",
+        "benefit": "Menekan refleks mual pada pusat di otak dengan sangat efektif.",
+        "dosage": "8 mg per dosis, boleh dihisap/ludah jika bentuk tablet hisap.",
+        "usage_time": ["pagi", "siang", "sore"],
+        "frequency": "2-3x sehari",
+    },
+    {
+        "match": ["Metoklopramid", "Metoclopramide"],
+        "indication": "Mual, muntah, dan kelambatan pengosongan lambung.",
+        "benefit": "Mempercepat makanan turun dari lambung ke usus sehingga rasa mual berkurang.",
+        "dosage": "10 mg per dosis sesudah makan, maksimal 5 hari dan tidak untuk penggunaan rutin.",
+        "usage_time": ["pagi", "siang", "sore"],
+        "frequency": "3x sehari",
+    },
+    {
+        "match": ["Loperamid", "Loperamide"],
+        "indication": "Diare akut non-bakteri dan sindrom iritasi usus.",
+        "benefit": "Memperlambat gerak usus sehingga tinja lebih padat dan frekuensi mencret berkurang.",
+        "dosage": "2 kapsul setelah BAB pertama, lalu 1 kapsul setiap BAB cair; maksimal 8 kapsul per hari.",
+        "usage_time": ["pagi", "siang", "sore", "malam"],
+        "frequency": "Sesuai kebutuhan (hingga 4x sehari)",
+    },
+    {
+        "match": ["Oralit", "ORS", "Elektrolit"],
+        "indication": "Pengganti cairan tubuh saat diare atau muntah untuk mencegah dehidrasi.",
+        "benefit": "Mengembalikan gula dan garam tubuh sehingga risiko lemas akibat dehidrasi menurun.",
+        "dosage": "Larutkan 1 bungkus dalam 1 liter air matang; diminum 200-400 mL per kali mencret.",
+        "usage_time": ["pagi", "siang", "sore", "malam"],
+        "frequency": "Sesuai kebutuhan",
+    },
+    {
+        "match": ["Ambroksol", "Ambroxol"],
+        "indication": "Batuk berdahak dan bronkitis dengan dahak yang sulit keluar.",
+        "benefit": "Menipiskan dahak sehingga lebih mudah dikeluarkan.",
+        "dosage": "30 mg per dosis sesudah makan.",
+        "usage_time": ["pagi", "siang", "sore"],
+        "frequency": "3x sehari",
+    },
+    {
+        "match": ["Bromheksin", "Bromhexine"],
+        "indication": "Batuk berdahak.",
+        "benefit": "Melonggarkan dahak supaya batuk lebih produktif.",
+        "dosage": "8 mg per dosis sesudah makan.",
+        "usage_time": ["pagi", "siang", "sore"],
+        "frequency": "3x sehari",
+    },
+    {
+        "match": ["Salbutamol", "Albuterol"],
+        "indication": "Asma, sesak napas, dan bronkospasme.",
+        "benefit": "Melebarkan saluran napas dalam hitungan menit saat sesak.",
+        "dosage": "Tablet: 4 mg per dosis. Inhaler: 1-2 semprotan sesuai kebutuhan.",
+        "usage_time": ["pagi", "siang", "sore", "malam"],
+        "frequency": "Sesuai kebutuhan (hingga 3x sehari)",
+    },
+    {
+        "match": ["Montelukast"],
+        "indication": "Pencegahan serangan asma dan gejala alergi musiman.",
+        "benefit": "Menjaga saluran napas tetap terbuka bila diminum rutin setiap malam.",
+        "dosage": "10 mg per hari untuk dewasa.",
+        "usage_time": ["malam"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Cetirizine", "Levocetirizine"],
+        "indication": "Alergi: bersin, hidung meler, gatal, dan biduran.",
+        "benefit": "Mengurangi gejala alergi sekaligus membantu tidur lebih nyenyak karena bisa menyebabkan kantuk.",
+        "dosage": "Cetirizine 10 mg atau Levocetirizine 5 mg per hari.",
+        "usage_time": ["malam"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Loratadin", "Loratadine"],
+        "indication": "Alergi kulit dan saluran napas: gatal, bersin, dan biduran.",
+        "benefit": "Merawat alergi tanpa membuat ngantuk sehingga aman untuk aktivitas siang.",
+        "dosage": "10 mg per hari sesudah makan.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Klorfeniramin", "Chlorpheniramine"],
+        "indication": "Alergi, gatal, bersin, dan pilek alergi.",
+        "benefit": "Mengurangi reaksi alergi; dapat menimbulkan kantuk sehingga lebih baik di malam hari.",
+        "dosage": "4 mg per dosis.",
+        "usage_time": ["pagi", "siang", "sore", "malam"],
+        "frequency": "2-3x sehari",
+    },
+    {
+        "match": ["Difenhidramin", "Diphenhydramine"],
+        "indication": "Alergi dan sulit tidur.",
+        "benefit": "Merilekskan tubuh dan membantu cepat tidur.",
+        "dosage": "25-50 mg diminum 30 menit sebelum tidur.",
+        "usage_time": ["malam"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Deksametason", "Dexamethasone"],
+        "indication": "Peradangan berat, alergi, asma, dan kondisi yang memerlukan terapi steroid singkat.",
+        "benefit": "Mengurangi peradangan dan reaksi alergi dengan cepat.",
+        "dosage": "0,5-1,5 mg per hari sesuai anjuran dokter, diminum sesudah makan.",
+        "usage_time": ["pagi", "siang", "sore"],
+        "frequency": "1-2x sehari",
+    },
+    {
+        "match": ["Metilprednisolon", "Methylprednisolone"],
+        "indication": "Peradangan dan alergi yang memerlukan terapi steroid.",
+        "benefit": "Meredakan peradangan dengan dosis harian sekali di pagi hari.",
+        "dosage": "4-48 mg per hari sesuai anjuran dokter, diminum sesudah makan pagi.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Furosemid", "Furosemide"],
+        "indication": "Pembengkakan (edema) akibat gagal jantung, gangguan ginjal, dan hipertensi.",
+        "benefit": "Membuang kelebihan cairan dan garam lewat urine sehingga bengkak berkurang.",
+        "dosage": "20-40 mg diminum di pagi hari sesudah makan.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Spironolakton", "Spironolactone"],
+        "indication": "Pembengkakan, gagal jantung, dan hipertensi.",
+        "benefit": "Membuang kelebihan cairan tanpa banyak menghilangkan kalium.",
+        "dosage": "25-100 mg per hari sesuai anjuran dokter.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Hidroklorotiazid", "Hydrochlorothiazide"],
+        "indication": "Hipertensi dan pembengkakan ringan.",
+        "benefit": "Menurunkan tekanan darah dengan mengurangi kadar garam dan cairan tubuh.",
+        "dosage": "12,5-25 mg diminum di pagi hari.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Amlodipin", "Amlodipine"],
+        "indication": "Hipertensi dan nyeri dada (angina).",
+        "benefit": "Melebarkan pembuluh darah sehingga tekanan darah turun dan jantung tidak bekerja berlebihan.",
+        "dosage": "5-10 mg per hari.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Losartan"],
+        "indication": "Hipertensi dan perlindungan fungsi ginjal pada pasien diabetes.",
+        "benefit": "Menurunkan tekanan darah dengan risiko batuk kering lebih kecil dibanding golongan ACE inhibitor.",
+        "dosage": "50-100 mg per hari.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Kaptopril", "Captopril"],
+        "indication": "Hipertensi dan gagal jantung.",
+        "benefit": "Melebarkan pembuluh darah dan menurunkan tekanan darah dengan cepat.",
+        "dosage": "12,5-25 mg per dosis sesudah makan.",
+        "usage_time": ["pagi", "siang", "sore"],
+        "frequency": "3x sehari",
+    },
+    {
+        "match": ["Enalapril"],
+        "indication": "Hipertensi dan gagal jantung.",
+        "benefit": "Menurunkan tekanan darah dan mengurangi beban kerja jantung.",
+        "dosage": "5-20 mg per hari, dapat dibagi menjadi 1-2 dosis.",
+        "usage_time": ["pagi", "malam"],
+        "frequency": "1-2x sehari",
+    },
+    {
+        "match": ["Atenolol"],
+        "indication": "Hipertensi dan penanganan pasca serangan jantung.",
+        "benefit": "Memperlambat denyut jantung sehingga tekanan darah lebih stabil.",
+        "dosage": "50-100 mg per hari.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Metoprolol"],
+        "indication": "Hipertensi, angina, dan gagal jantung.",
+        "benefit": "Menurunkan denyut dan tekanan darah, menjaga jantung tetap teratur.",
+        "dosage": "25-100 mg per dosis sesudah makan.",
+        "usage_time": ["pagi", "malam"],
+        "frequency": "1-2x sehari",
+    },
+    {
+        "match": ["Propranolol"],
+        "indication": "Hipertensi, tremor, dan rasa gugup berlebihan.",
+        "benefit": "Menurunkan denyut jantung serta meredakan tremor dan gugup.",
+        "dosage": "20-40 mg per dosis sesudah makan.",
+        "usage_time": ["pagi", "siang", "sore", "malam"],
+        "frequency": "2-3x sehari",
+    },
+    {
+        "match": ["Simvastatin"],
+        "indication": "Kolesterol tinggi dan pencegahan penyakit jantung.",
+        "benefit": "Menurunkan kolesterol jahat (LDL) dan lemak darah.",
+        "dosage": "10-40 mg diminum di malam hari.",
+        "usage_time": ["malam"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Atorvastatin"],
+        "indication": "Kolesterol tinggi dan pencegahan stroke.",
+        "benefit": "Menurunkan LDL dan menstabilkan lemak darah secara menyeluruh.",
+        "dosage": "10-40 mg per hari, dapat diminum kapan saja secara konsisten.",
+        "usage_time": ["malam"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Metformin"],
+        "indication": "Diabetes melitus tipe 2.",
+        "benefit": "Menurunkan gula darah dengan meningkatkan kerja insulin dan mengurangi produksi gula di hati.",
+        "dosage": "500 mg per dosis sesudah makan untuk menghindari gangguan lambung.",
+        "usage_time": ["pagi", "siang", "malam"],
+        "frequency": "2-3x sehari",
+    },
+    {
+        "match": ["Glibenklamid", "Glibenclamide", "Gliklazid", "Gliclazide"],
+        "indication": "Diabetes melitus tipe 2.",
+        "benefit": "Merangsang pankreas mengeluarkan lebih banyak insulin untuk menurunkan gula darah.",
+        "dosage": "Diminum sesudah sarapan pagi sesuai anjuran dokter.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Glimepirid", "Glimepiride"],
+        "indication": "Diabetes melitus tipe 2.",
+        "benefit": "Membantu menurunkan gula darah setelah makan.",
+        "dosage": "1-4 mg sesudah sarapan pagi sesuai anjuran dokter.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Ferrous Fumarate", "Ferrous Sulfate", "Ferum", "Zat Besi"],
+        "indication": "Anemia akibat kekurangan zat besi, terutama pada ibu hamil dan menstruasi.",
+        "benefit": "Membantu tubuh membentuk sel darah merah sehingga tidak mudah lemas.",
+        "dosage": "1 tablet sesudah makan pagi; hindari teh dan susu 1 jam setelahnya.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Asam Folat", "Folic Acid"],
+        "indication": "Pencegahan kekurangan folat, anemia megaloblastik, dan kebutuhan ibu hamil.",
+        "benefit": "Mendukung pembentukan sel darah dan perkembangan janin.",
+        "dosage": "400-800 mcg per hari sesudah makan.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Asam Askorbat", "Vitamin C", "Ascorbic Acid"],
+        "indication": "Mencegah dan menangani kekurangan vitamin C.",
+        "benefit": "Menjaga daya tahan tubuh dan membantu penyerapan zat besi.",
+        "dosage": "500 mg per hari sesudah makan.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Kalsium", "Calcium"],
+        "indication": "Pencegahan osteoporosis dan kebutuhan kalsium tambahan.",
+        "benefit": "Menjaga kepadatan tulang dan gigi.",
+        "dosage": "1 tablet sesudah makan pagi, boleh dengan vitamin D.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Multivitamin", "Vitamin B Kompleks", "Neurobion"],
+        "indication": "Pemulihan setelah sakit dan memenuhi kebutuhan vitamin harian.",
+        "benefit": "Membantu metabolisme dan menjaga fungsi saraf serta daya tahan tubuh.",
+        "dosage": "1 kapsul sesudah makan pagi.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Ketoconazol", "Ketoconazole"],
+        "indication": "Infeksi jamur pada kulit, rambut, dan kuku.",
+        "benefit": "Membunuh jamur penyebit gatal dan kerontokan akibat infeksi.",
+        "dosage": "200 mg per hari sesudah makan, sesuai anjuran dokter.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+    {
+        "match": ["Klotrimazol", "Clotrimazole"],
+        "indication": "Jamur kulit, kurap, kutu air, dan keputihan.",
+        "benefit": "Meredakan gatal dan menghilangkan jamur pada area yang dioles.",
+        "dosage": "Oleskan tipis dan rata pada area yang terkena, lalu pijat perlahan.",
+        "usage_time": ["pagi", "malam"],
+        "frequency": "2x sehari",
+    },
+    {
+        "match": ["Mikonazol", "Miconazole"],
+        "indication": "Infeksi jamur kulit dan ruam popok akibat jamur.",
+        "benefit": "Mengurangi gatal, merah, dan perih akibat jamur.",
+        "dosage": "Oleskan tipis pada kulit yang terkena setelah dibersihkan.",
+        "usage_time": ["pagi", "malam"],
+        "frequency": "2x sehari",
+    },
+    {
+        "match": ["Asiklovir", "Acyclovir"],
+        "indication": "Infeksi virus herpes dan cacar air.",
+        "benefit": "Mempercepat penyembuhan lesi dan mengurangi keluhan nyeri.",
+        "dosage": "400 mg per dosis sesudah makan dengan banyak air; umumnya 5-10 hari.",
+        "usage_time": ["pagi", "siang", "sore"],
+        "frequency": "3x sehari",
+    },
+    {
+        "match": ["Albendazol", "Albendazole"],
+        "indication": "Infeksi cacing kait, cacing tambang, dan cacing pita.",
+        "benefit": "Membunuh cacing dewasa sehingga gejala akibat infeksi membaik.",
+        "dosage": "400 mg dalam satu dosis, diminum di malam hari setelah makan.",
+        "usage_time": ["malam"],
+        "frequency": "1x (dosis tunggal)",
+    },
+    {
+        "match": ["Klopidogrel", "Clopidogrel"],
+        "indication": "Pencegahan penggumpalan darah setelah stroke atau serangan jantung.",
+        "benefit": "Menipiskan darah sehingga aliran darah ke jantung dan otak tetap lancar.",
+        "dosage": "75 mg per hari sesudah makan, sesuai anjuran dokter.",
+        "usage_time": ["pagi"],
+        "frequency": "1x sehari",
+    },
+]
+
+
+def apply_usage_guides(db) -> int:
+    from sqlalchemy import func, or_
+
+    updated = 0
+    fields = ("indication", "benefit", "dosage", "usage_time", "frequency")
+    for guide in USAGE_GUIDES:
+        keys = [key.strip().lower() for key in guide["match"]]
+        rows = (
+            db.query(Drug)
+            .filter(or_(func.lower(Drug.generic_name).in_(keys), func.lower(Drug.name).in_(keys)))
+            .all()
+        )
+        for row in rows:
+            changed = False
+            for field in fields:
+                if not getattr(row, field):
+                    setattr(row, field, guide[field])
+                    changed = True
+            if changed:
+                updated += 1
+    return updated
+
+
 def seed():
     db = SessionLocal()
     try:
@@ -724,6 +1207,9 @@ def seed():
                 added += 1
         db.commit()
         print(f"Berhasil menambahkan {added} data obat baru.")
+        updated = apply_usage_guides(db)
+        db.commit()
+        print(f"Berhasil melengkapi aturan pakai pada {updated} obat.")
     finally:
         db.close()
 

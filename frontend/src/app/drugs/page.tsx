@@ -79,7 +79,7 @@ function DrugCard({ drug }: { drug: Drug }) {
       <div className="drug-card-top"><div className={`drug-avatar ${drug.image_url ? "has-image" : ""}`}>{drug.image_url ? <img src={drug.image_url} alt="" /> : <span>{drug.name.charAt(0).toUpperCase()}</span>}</div><div className="drug-card-meta">{drug.category && <span className="drug-category">{drug.category}</span>}<span className="drug-id">ID {String(drug.id).padStart(3, "0")}</span></div></div>
       <h2>{drug.name}</h2>
       {drug.generic_name && <p className="drug-generic">{drug.generic_name}</p>}
-      <div className="drug-details">{drug.dosage_form && <span><b>BENTUK</b>{drug.dosage_form}</span>}{drug.manufacturer && <span><b>PRODUSEN</b>{drug.manufacturer}</span>}</div>
+      <div className="drug-details">{drug.dosage_form && <span><b>BENTUK</b>{drug.dosage_form}</span>}{drug.frequency && <span><b>FREKUENSI</b>{drug.frequency}</span>}{drug.manufacturer && <span><b>PRODUSEN</b>{drug.manufacturer}</span>}</div>
       {drug.description && <p className="drug-description">{drug.description}</p>}
       <div className="drug-card-footer"><span className="drug-card-mark" aria-hidden="true">✦</span></div>
     </Link>

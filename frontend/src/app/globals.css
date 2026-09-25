@@ -1259,6 +1259,8 @@ html[data-theme="dark"] .site-nav,
 html[data-theme="dark"] .site-footer,
 html[data-theme="dark"] .drug-detail-hero,
 html[data-theme="dark"] .drug-detail-content dl div,
+html[data-theme="dark"] .drug-detail-main section + section,
+html[data-theme="dark"] .usage-time-badge,
 html[data-theme="dark"] .result-line,
 html[data-theme="dark"] .prescription-meta,
 html[data-theme="dark"] .medication-row,
@@ -1582,6 +1584,40 @@ html[data-theme="dark"] input {
     margin: 0;
     color: #304d42;
     font: 14px Arial, sans-serif;
+}
+
+.drug-detail-main {
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+}
+
+.drug-detail-main section + section {
+    padding-top: 40px;
+    border-top: 1px solid #d3dfd4;
+}
+
+.usage-time-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.usage-time-badge {
+    padding: 7px 16px;
+    border: 1px solid #d3dfd4;
+    border-radius: 999px;
+    color: #91a097;
+    background: transparent;
+    font: 700 10px Arial, sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.usage-time-badge.is-active {
+    color: #edf5d7;
+    background: #173f34;
+    border-color: #173f34;
 }
 
 .drug-detail-note {

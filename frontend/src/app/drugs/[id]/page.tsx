@@ -5,6 +5,13 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+const TIME_SLOTS = [
+  { value: "pagi", label: "Pagi" },
+  { value: "siang", label: "Siang" },
+  { value: "sore", label: "Sore" },
+  { value: "malam", label: "Malam" },
+];
+
 export default function DrugDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [drug, setDrug] = useState<Drug | null>(null);
@@ -39,7 +46,35 @@ export default function DrugDetailPage() {
             </header>
 
             <div className="drug-detail-content">
-              <section><span className="section-kicker">INFORMASI RINGKAS</span><h2>Tentang obat ini</h2><p>{drug.description || "Deskripsi obat belum tersedia."}</p></section>
+              <div className="drug-detail-main">
+                <section><span className="section-kicker">INFORMASI RINGKAS</span><h2>Tentang obat ini</h2><p>{drug.description || "Deskripsi obat belum tersedia."}</p></section>
+              <section className="usage-guidance">
+                <span className="section-kicker">KEGUNAAN &amp; MANFAAT</span>
+                <h2>Untuk apa obat ini</h2>
+                <dl>
+                  <div><dt>Kegunaan</dt><dd>{drug.indication || "Belum tersedia"}</dd></div>
+                  <div><dt>Manfaat</dt><dd>{drug.benefit || "Belum tersedia"}</dd></div>
+                </dl>
+              </section>
+              <section className="usage-guidance">
+                <span className="section-kicker">ATURAN PAKAI</span>
+                <h2>Dosis &amp; cara pemakaian</h2>
+                <dl>
+                  <div><dt>Dosis</dt><dd>{drug.dosage || "Belum tersedia"}</dd></div>
+                  <div><dt>Waktu konsumsi</dt>
+                    <dd>
+                      <div className="usage-time-badges">
+                        {TIME_SLOTS.map((slot) => {
+                          const active = (drug.usage_time ?? []).includes(slot.value);
+                          return <span key={slot.value} className={`usage-time-badge ${active ? "is-active" : ""}`}>{slot.label}</span>;
+                        })}
+                      </div>
+                    </dd>
+                  </div>
+                  <div><dt>Frekuensi</dt><dd>{drug.frequency || "Belum tersedia"}</dd></div>
+                </dl>
+                </section>
+              </div>
               <dl>
                 <div><dt>Kategori</dt><dd>{drug.category || "Belum tersedia"}</dd></div>
                 <div><dt>Bentuk sediaan</dt><dd>{drug.dosage_form || "Belum tersedia"}</dd></div>
