@@ -1,13 +1,16 @@
 from fastapi import FastAPI, UploadFile, File, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from dotenv import load_dotenv
 import os
-from pathlib import Path
 
-_env_backend = Path(__file__).resolve().parents[1] / "backend"
-load_dotenv(_env_backend / ".env")
-load_dotenv(_env_backend / ".env.local", override=True)
+try:
+    from dotenv import load_dotenv
+    from pathlib import Path
+    _env_backend = Path(__file__).resolve().parent.parent / "backend"
+    load_dotenv(_env_backend / ".env")
+    load_dotenv(_env_backend / ".env.local", override=True)
+except ImportError:
+    pass
 
 import httpx
 import base64
@@ -294,7 +297,7 @@ def get_drug(drug_id: int):
         created_at = Column(DateTime)
         updated_at = Column(DateTime)
 
-     with Session(engine) as db:
+    with Session(engine) as db:
         drug = db.query(Drug).filter(Drug.id == drug_id).first()
         if not drug:
             raise HTTPException(status_code=404, detail="Drug not found")
