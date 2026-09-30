@@ -8,6 +8,8 @@ load_dotenv()
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 AI_MODEL = os.getenv("AI_MODEL", "openai/gpt-4o-mini")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+GEMINI_IMAGE_MODEL = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
 
 CLOUDFLARE_ACCOUNT_ID = os.getenv("CLOUDFLARE_ACCOUNT_ID", "")
 CLOUDFLARE_API_TOKEN = os.getenv("CLOUDFLARE_API_TOKEN", "")
@@ -257,8 +259,8 @@ async def analyze_drug(drug_data: dict) -> dict:
 
 
 async def generate_drug_visual(drug_data: dict, use_premium: bool = False) -> dict:
-    if not CLOUDFLARE_ACCOUNT_ID or not CLOUDFLARE_API_TOKEN:
-        raise ValueError("Cloudflare Workers AI belum dikonfigurasi untuk generasi gambar")
+    if not GOOGLE_API_KEY and (not CLOUDFLARE_ACCOUNT_ID or not CLOUDFLARE_API_TOKEN):
+        raise ValueError("Provider generasi gambar belum dikonfigurasi")
 
     name = drug_data.get("name") or ""
     generic_name = drug_data.get("generic_name") or ""
@@ -287,6 +289,52 @@ async def generate_drug_visual(drug_data: dict, use_premium: bool = False) -> di
         f"kemasannya. Fotografi realistis dengan pencahayaan studio yang baik, latar belakang "
         f"putih bersih. Jangan termasuk teks, logo, atau watermark."
     )
+
+    gemini_error = None
+    if GOOGLE_API_KEY:
+        gemini_url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{GEMINI_IMAGE_MODEL}:generateContent?key={GOOGLE_API_KEY}"
+        )
+        try:
+            async with httpx.AsyncClient(timeout=120, follow_redirects=True) as client:
+                gemini_resp = await client.post(
+                    gemini_url,
+                    json={
+                        "contents": [{"parts": [{"text": prompt}]}],
+                        "generationConfig": {"responseModalities": ["IMAGE"]},
+                    },
+                )
+            if gemini_resp.is_success:
+                data = gemini_resp.json()
+                parts = ((data.get("candidates") or [{}])[0].get("content") or {}).get("parts") or []
+                for part in parts:
+                    inline = part.get("inlineData") or part.get("inline_data") or {}
+                    if inline.get("data"):
+                        mime = inline.get("mimeType") or inline.get("mime_type") or "image/png"
+                        return {
+                            "image_url": f"data:{mime};base64,{inline['data']}",
+                            "revised_prompt": prompt,
+                            "model": GEMINI_IMAGE_MODEL,
+                            "premium": False,
+                        }
+                gemini_error = "Gemini tidak mengembalikan data gambar"
+            else:
+                try:
+                    message = (gemini_resp.json().get("error") or {}).get("message")
+                except (ValueError, AttributeError):
+                    message = None
+                if gemini_resp.status_code == 429:
+                    gemini_error = "Kuota Gemini Flash Image habis atau tidak tersedia pada free tier"
+                else:
+                    gemini_error = f"Gemini gagal (HTTP {gemini_resp.status_code}){f': {message}' if message else ''}"
+        except httpx.TimeoutException:
+            gemini_error = "Gemini melewati batas waktu"
+        except httpx.RequestError:
+            gemini_error = "Gemini tidak dapat dihubungi"
+
+        if not CLOUDFLARE_ACCOUNT_ID or not CLOUDFLARE_API_TOKEN:
+            raise ValueError(gemini_error)
 
     model = PREMIUM_IMAGE_MODEL if use_premium else STANDARD_IMAGE_MODEL
     image_api_url = (
@@ -317,10 +365,11 @@ async def generate_drug_visual(drug_data: dict, use_premium: bool = False) -> di
             message = errors[0].get("message") if errors else None
         except (ValueError, AttributeError, IndexError):
             message = None
-        raise ValueError(
+        cloudflare_error = (
             f"Provider gambar gagal (HTTP {resp.status_code})"
             f"{f': {message}' if message else ''}"
         )
+        raise ValueError(f"{gemini_error}; fallback Cloudflare: {cloudflare_error}" if gemini_error else cloudflare_error)
 
     try:
         data = resp.json()
