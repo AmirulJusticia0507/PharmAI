@@ -32,6 +32,10 @@ OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/ap
 OMNIROUTE_API_KEY = os.getenv("OMNIROUTE_API_KEY", "")
 OMNIROUTE_BASE_URL = os.getenv("OMNIROUTE_BASE_URL", "")
 AI_MODEL = os.getenv("AI_MODEL", "openai/gpt-4o-mini")
+AI_PROVIDER = os.getenv("AI_PROVIDER", "openrouter").lower()
+GRIPHUB_API_KEY = os.getenv("GRIPHUB_API_KEY", "")
+GRIPHUB_BASE_URL = os.getenv("GRIPHUB_BASE_URL", "https://griphubrouter.web.id/v1")
+GRIPHUB_MODEL = os.getenv("GRIPHUB_MODEL", "gemini-3.8-flash")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 GEMINI_IMAGE_MODEL = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
 
@@ -46,10 +50,17 @@ STANDARD_IMAGE_MODEL = os.getenv(
 
 
 async def chat_completion(messages: list[dict], model: str | None = None) -> str:
-    if OPENROUTER_API_KEY:
+    if AI_PROVIDER == "griphub":
+        if not GRIPHUB_API_KEY:
+            raise HTTPException(status_code=503, detail="GripHub belum dikonfigurasi")
+        base_url, api_key = GRIPHUB_BASE_URL, GRIPHUB_API_KEY
+        selected_model = model or GRIPHUB_MODEL
+    elif OPENROUTER_API_KEY:
         base_url, api_key = OPENROUTER_BASE_URL, OPENROUTER_API_KEY
+        selected_model = model or AI_MODEL
     elif OMNIROUTE_BASE_URL:
         base_url, api_key = OMNIROUTE_BASE_URL, OMNIROUTE_API_KEY
+        selected_model = model or AI_MODEL
     else:
         raise HTTPException(status_code=503, detail="Provider AI belum dikonfigurasi")
 
@@ -62,7 +73,7 @@ async def chat_completion(messages: list[dict], model: str | None = None) -> str
                 "HTTP-Referer": "https://pharm-ai-rouge.vercel.app",
                 "X-Title": "PharmAI",
             },
-            json={"model": model or AI_MODEL, "messages": messages, "max_tokens": 1024},
+            json={"model": selected_model, "messages": messages, "max_tokens": 1024},
         )
         if not resp.is_success:
             try:

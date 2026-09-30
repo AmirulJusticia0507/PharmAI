@@ -8,6 +8,10 @@ load_dotenv()
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 AI_MODEL = os.getenv("AI_MODEL", "openai/gpt-4o-mini")
+AI_PROVIDER = os.getenv("AI_PROVIDER", "openrouter").lower()
+GRIPHUB_API_KEY = os.getenv("GRIPHUB_API_KEY", "")
+GRIPHUB_BASE_URL = os.getenv("GRIPHUB_BASE_URL", "https://griphubrouter.web.id/v1")
+GRIPHUB_MODEL = os.getenv("GRIPHUB_MODEL", "gemini-3.8-flash")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 GEMINI_IMAGE_MODEL = os.getenv("GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image")
 
@@ -22,16 +26,29 @@ STANDARD_IMAGE_MODEL = os.getenv(
 
 
 async def chat_completion(messages: list[dict], model: str | None = None) -> str:
+    if AI_PROVIDER == "griphub":
+        if not GRIPHUB_API_KEY:
+            raise ValueError("GRIPHUB_API_KEY belum dikonfigurasi")
+        base_url = GRIPHUB_BASE_URL
+        api_key = GRIPHUB_API_KEY
+        selected_model = model or GRIPHUB_MODEL
+    else:
+        if not OPENROUTER_API_KEY:
+            raise ValueError("OPENROUTER_API_KEY belum dikonfigurasi")
+        base_url = OPENROUTER_BASE_URL
+        api_key = OPENROUTER_API_KEY
+        selected_model = model or AI_MODEL
+
     async with httpx.AsyncClient(timeout=60) as client:
         resp = await client.post(
-            f"{OPENROUTER_BASE_URL}/chat/completions",
+            f"{base_url.rstrip('/')}/chat/completions",
             headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
                 "HTTP-Referer": "http://localhost:8000",
                 "X-Title": "PharmAI",
             },
-            json={"model": model or AI_MODEL, "messages": messages, "max_tokens": 1024},
+            json={"model": selected_model, "messages": messages, "max_tokens": 1024},
         )
         resp.raise_for_status()
         return resp.json()["choices"][0]["message"]["content"]
