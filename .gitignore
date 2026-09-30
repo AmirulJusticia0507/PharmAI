@@ -7,6 +7,7 @@ venv/
 env/
 
 # Next.js
+.next/
 frontend/.next/
 frontend/out/
 frontend/**/*.tsbuildinfo
