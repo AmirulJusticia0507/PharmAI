@@ -19,7 +19,9 @@ export default function DrugsPage() {
   const [analysisDrug, setAnalysisDrug] = useState<Drug | null>(null);
   const [analysisResult, setAnalysisResult] = useState<DrugAnalysis | null>(null);
   const [generatingId, setGeneratingId] = useState<number | null>(null);
+  const [imageDrug, setImageDrug] = useState<Drug | null>(null);
   const [imageResult, setImageResult] = useState<DrugVisualResult | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   const loadDrugs = async (q = "", pageNumber = 1) => {
     setLoading(true);
@@ -69,19 +71,25 @@ export default function DrugsPage() {
   };
 
   const handleGenerateImage = async (drug: Drug) => {
+    setImageDrug(drug);
+    setImageResult(null);
+    setImageError(null);
     setGeneratingId(drug.id);
     try {
       const result = await generateDrugImage(drug.id, false);
       setImageResult(result);
-    } catch {
-      setImageResult(null);
+    } catch (error) {
+      setImageError(error instanceof Error ? error.message : "Gagal menghasilkan gambar obat");
     } finally {
       setGeneratingId(null);
     }
   };
 
   const closeImage = () => {
+    if (generatingId !== null) return;
+    setImageDrug(null);
     setImageResult(null);
+    setImageError(null);
   };
 
   const closeAnalysis = () => {
@@ -150,15 +158,26 @@ export default function DrugsPage() {
           </div>
         )}
 
-        {imageResult && (
+        {imageDrug && (
           <div className="analysis-overlay" onClick={closeImage}>
             <div className="analysis-modal" onClick={(e) => e.stopPropagation()}>
               <div className="analysis-header">
-                <h3>Ilustrasi AI Obat</h3>
-                <button type="button" className="analysis-close" onClick={closeImage} aria-label="Tutup">✕</button>
+                <h3>Ilustrasi AI — {imageDrug.name}</h3>
+                <button type="button" className="analysis-close" onClick={closeImage} aria-label="Tutup" disabled={generatingId !== null}>✕</button>
               </div>
               <div className="analysis-content">
-                {imageResult.image_url ? (
+                {generatingId === imageDrug.id ? (
+                  <div className="analysis-loading">
+                    <span className="spinner" />
+                    <p>Membuat ilustrasi obat… Proses ini dapat memerlukan hingga satu menit.</p>
+                  </div>
+                ) : imageError ? (
+                  <div className="analysis-field">
+                    <b>Gambar belum berhasil dibuat</b>
+                    <p>{imageError}</p>
+                    <button type="button" className="primary-action" onClick={() => handleGenerateImage(imageDrug)}>Coba lagi</button>
+                  </div>
+                ) : imageResult?.image_url ? (
                   <div className="analysis-field">
                     <img
                       src={imageResult.image_url}

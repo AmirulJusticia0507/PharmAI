@@ -294,19 +294,40 @@ async def generate_drug_visual(drug_data: dict, use_premium: bool = False) -> di
         f"/ai/run/{model}"
     )
 
-    async with httpx.AsyncClient(timeout=60) as client:
-        resp = await client.post(
-            image_api_url,
-            headers={
-                "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
-                "Content-Type": "application/json",
-            },
-            json={"prompt": prompt, "steps": 4},
-        )
-        resp.raise_for_status()
-        data = resp.json()
+    try:
+        async with httpx.AsyncClient(timeout=120, follow_redirects=True) as client:
+            resp = await client.post(
+                image_api_url,
+                headers={
+                    "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+                json={"prompt": prompt, "steps": 4},
+            )
+    except httpx.TimeoutException as exc:
+        raise ValueError("Generator gambar melewati batas waktu. Silakan coba lagi.") from exc
+    except httpx.RequestError as exc:
+        raise ValueError("Generator gambar tidak dapat dihubungi. Silakan coba lagi.") from exc
 
-    image_data = (data.get("result") or {}).get("image", "")
+    if not resp.is_success:
+        try:
+            payload = resp.json()
+            errors = payload.get("errors") or []
+            message = errors[0].get("message") if errors else None
+        except (ValueError, AttributeError, IndexError):
+            message = None
+        raise ValueError(
+            f"Provider gambar gagal (HTTP {resp.status_code})"
+            f"{f': {message}' if message else ''}"
+        )
+
+    try:
+        data = resp.json()
+        result = data.get("result") or {}
+        image_data = result.get("image") if isinstance(result, dict) else ""
+    except ValueError:
+        image_data = base64.b64encode(resp.content).decode() if resp.content else ""
     if not image_data:
         raise ValueError("Cloudflare Workers AI tidak mengembalikan data gambar")
 

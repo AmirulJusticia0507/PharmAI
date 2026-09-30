@@ -167,6 +167,15 @@ export async function generateDrugImage(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ drug_id: drugId, use_premium: usePremium }),
   });
-  if (!res.ok) throw new Error("Gagal menghasilkan gambar obat");
+  if (!res.ok) {
+    let message = "Gagal menghasilkan gambar obat";
+    try {
+      const payload = await res.json();
+      if (typeof payload?.detail === "string") message = payload.detail;
+    } catch {
+      // Keep the friendly fallback when the server does not return JSON.
+    }
+    throw new Error(message);
+  }
   return res.json();
 }

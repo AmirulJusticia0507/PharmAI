@@ -828,9 +828,6 @@ async def generate_drug_image(req: DrugVisualRequest):
         manufacturer = Column(String(255))
         dosage = Column(Text)
         active_ingredients = Column(JSON)
-        color = Column(String(100))
-        shape = Column(String(100))
-        imprint = Column(String(255))
 
     with Session(engine) as db:
         drug = db.query(Drug).filter(Drug.id == req.drug_id).first()
@@ -844,9 +841,9 @@ async def generate_drug_image(req: DrugVisualRequest):
             "description": drug.description or "",
             "active_ingredients": drug.active_ingredients or [],
             "dosage": drug.dosage or "",
-            "color": drug.color or "",
-            "shape": drug.shape or "",
-            "imprint": drug.imprint or "",
+            "color": "",
+            "shape": "",
+            "imprint": "",
         }
 
     prompt = (
@@ -872,27 +869,46 @@ async def generate_drug_image(req: DrugVisualRequest):
         f"/ai/run/{model}"
     )
 
-    async with httpx.AsyncClient(timeout=60) as client:
-        resp = await client.post(
-            image_api_url,
-            headers={
-                "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
-                "Content-Type": "application/json",
-            },
-            json={"prompt": prompt, "steps": 4},
-        )
-        if not resp.is_success:
-            try:
-                message = resp.json().get("error", {}).get("message")
-            except Exception:
-                message = None
-            raise HTTPException(
-                status_code=502,
-                detail=f"Provider AI gagal (HTTP {resp.status_code}){f': {message}' if message else ''}",
+    try:
+        async with httpx.AsyncClient(timeout=120, follow_redirects=True) as client:
+            resp = await client.post(
+                image_api_url,
+                headers={
+                    "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+                json={"prompt": prompt, "steps": 4},
             )
-        data = resp.json()
+    except httpx.TimeoutException as exc:
+        raise HTTPException(
+            status_code=504,
+            detail="Generator gambar melewati batas waktu. Silakan coba lagi.",
+        ) from exc
+    except httpx.RequestError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="Generator gambar tidak dapat dihubungi. Silakan coba lagi.",
+        ) from exc
 
-    image_data = (data.get("result") or {}).get("image", "")
+    if not resp.is_success:
+        try:
+            payload = resp.json()
+            errors = payload.get("errors") or []
+            message = errors[0].get("message") if errors else None
+        except (ValueError, AttributeError, IndexError):
+            message = None
+        raise HTTPException(
+            status_code=502,
+            detail=f"Provider gambar gagal (HTTP {resp.status_code}){f': {message}' if message else ''}",
+        )
+
+    try:
+        data = resp.json()
+        result = data.get("result") or {}
+        image_data = result.get("image") if isinstance(result, dict) else ""
+    except ValueError:
+        image_data = base64.b64encode(resp.content).decode() if resp.content else ""
     if not image_data:
         raise HTTPException(
             status_code=502,
