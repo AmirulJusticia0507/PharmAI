@@ -839,6 +839,7 @@ async def generate_drug_image(req: DrugVisualRequest):
         description = Column(Text)
         dosage_form = Column(String(500))
         manufacturer = Column(String(255))
+        image_url = Column(Text)
         dosage = Column(Text)
         active_ingredients = Column(JSON)
 
@@ -858,6 +859,14 @@ async def generate_drug_image(req: DrugVisualRequest):
             "shape": "",
             "imprint": "",
         }
+
+    def save_generated_image(image_url: str) -> None:
+        with Session(engine) as db:
+            saved_drug = db.query(Drug).filter(Drug.id == req.drug_id).first()
+            if not saved_drug:
+                raise HTTPException(status_code=404, detail="Drug not found")
+            saved_drug.image_url = image_url
+            db.commit()
 
     prompt = (
         f"Gambar realistis dari obat atau kemasannya. "
@@ -900,8 +909,10 @@ async def generate_drug_image(req: DrugVisualRequest):
                     inline = part.get("inlineData") or part.get("inline_data") or {}
                     if inline.get("data"):
                         mime = inline.get("mimeType") or inline.get("mime_type") or "image/png"
+                        image_url = f"data:{mime};base64,{inline['data']}"
+                        save_generated_image(image_url)
                         return {
-                            "image_url": f"data:{mime};base64,{inline['data']}",
+                            "image_url": image_url,
                             "revised_prompt": prompt,
                             "model": GEMINI_IMAGE_MODEL,
                             "premium": False,
@@ -979,6 +990,7 @@ async def generate_drug_image(req: DrugVisualRequest):
             detail="Cloudflare Workers AI tidak mengembalikan data gambar",
         )
     image_url = f"data:image/jpeg;base64,{image_data}"
+    save_generated_image(image_url)
 
     return {
         "image_url": image_url,

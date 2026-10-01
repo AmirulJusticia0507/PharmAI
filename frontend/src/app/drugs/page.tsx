@@ -78,6 +78,9 @@ export default function DrugsPage() {
     try {
       const result = await generateDrugImage(drug.id, false);
       setImageResult(result);
+      setDrugs((current) => current.map((item) => (
+        item.id === drug.id ? { ...item, image_url: result.image_url } : item
+      )));
     } catch (error) {
       setImageError(error instanceof Error ? error.message : "Gagal menghasilkan gambar obat");
     } finally {

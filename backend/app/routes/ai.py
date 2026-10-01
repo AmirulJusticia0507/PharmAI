@@ -86,6 +86,10 @@ async def generate_drug_image(req: DrugVisualRequest, db: Session = Depends(get_
         "imprint": getattr(drug, "imprint", "") or "",
     }
     try:
-        return await generate_drug_visual(drug_data, use_premium=req.use_premium)
+        result = await generate_drug_visual(drug_data, use_premium=req.use_premium)
+        drug.image_url = result["image_url"]
+        db.commit()
+        return result
     except ValueError as exc:
+        db.rollback()
         raise HTTPException(status_code=502, detail=str(exc)) from exc

@@ -17,7 +17,8 @@ class Drug(Base):
     usage_time = Column(JSON, nullable=False, default=list)
     frequency = Column(String(100), nullable=True)
     manufacturer = Column(String(255), nullable=True)
-    image_url = Column(String(500), nullable=True)
+    # Generated images are stored as data URLs, which can be hundreds of KB.
+    image_url = Column(Text, nullable=True)
     active_ingredients = Column(JSON, nullable=False, default=list)
     registration_number = Column(String(100), nullable=True, index=True)
     registration_status = Column(String(30), nullable=False, default="unverified")
