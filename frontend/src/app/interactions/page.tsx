@@ -148,7 +148,7 @@ export default function InteractionsPage() {
 
   return (
     <main className="interaction-shell">
-      <nav className="site-nav"><div className="nav-inner"><a href="/" className="brand" aria-label="PharmAI beranda"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></a><div className="nav-links"><a href="/drugs">Database Obat</a><a href="/interactions" className="interactions-nav-active">Interaksi</a><a href="/ocr">Resep</a></div><a href="/scan" className="nav-action">Mulai scan <span aria-hidden="true">↗</span></a></div></nav>
+      <nav className="site-nav"><div className="nav-inner"><a href="/" className="brand" aria-label="PharmAI beranda"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></a><div className="nav-links"><a href="/drugs">Database Obat</a><a href="/interactions" className="interactions-nav-active">Interaksi</a><a href="/keluhan">Cerita Keluhan</a><a href="/ocr">Resep</a></div><a href="/scan" className="nav-action">Mulai scan <span aria-hidden="true">↗</span></a></div></nav>
       <section className="interaction-page">
         <div className="interaction-heading"><div><span className="section-kicker">PHARM-AI SAFETY CHECK</span><h1>Minum lebih aman,<br /><em>mulai dari sini.</em></h1><p>Masukkan obat yang dikonsumsi bersamaan. PharmAI akan membantu menemukan potensi interaksi yang perlu diperhatikan.</p></div><div className="safety-mark"><span>✦</span><small>ANALISIS<br />BERBASIS AI</small></div></div>
         <div className="interaction-layout">

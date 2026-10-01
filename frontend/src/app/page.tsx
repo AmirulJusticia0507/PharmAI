@@ -4,7 +4,7 @@ export default function Home() {
       <nav className="site-nav">
         <div className="nav-inner">
           <a href="/" className="brand" aria-label="PharmAI beranda"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></a>
-          <div className="nav-links"><a href="/drugs">Database Obat</a><a href="/interactions">Interaksi</a><a href="/ocr">Resep</a></div>
+          <div className="nav-links"><a href="/drugs">Database Obat</a><a href="/interactions">Interaksi</a><a href="/keluhan">Cerita Keluhan</a><a href="/ocr">Resep</a></div>
           <a href="/scan" className="nav-action">Mulai scan <span aria-hidden="true">↗</span></a>
         </div>
       </nav>

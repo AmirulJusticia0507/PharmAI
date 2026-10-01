@@ -179,3 +179,26 @@ export async function generateDrugImage(
   }
   return res.json();
 }
+
+export interface SymptomAssessment {
+  urgency: "emergency" | "urgent" | "routine" | "self_care";
+  assessment: string;
+  self_care: string[];
+  otc_options: Array<{ medicine: string; purpose: string; directions: string; cautions: string }>;
+  red_flags: string[];
+  next_steps: string[];
+  disclaimer: string;
+}
+
+export async function assessSymptoms(data: Record<string, string | number | null>): Promise<SymptomAssessment> {
+  const res = await fetch(`${API_BASE}/api/ai/symptom-assessment`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const payload = await res.json().catch(() => null);
+    throw new Error(payload?.detail || "Keluhan belum dapat dianalisis");
+  }
+  return res.json();
+}

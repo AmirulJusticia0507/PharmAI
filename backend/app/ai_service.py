@@ -48,7 +48,7 @@ async def chat_completion(messages: list[dict], model: str | None = None) -> str
                 "HTTP-Referer": "http://localhost:8000",
                 "X-Title": "PharmAI",
             },
-            json={"model": selected_model, "messages": messages, "max_tokens": 1024},
+            json={"model": selected_model, "messages": messages, "max_tokens": 2048},
         )
         resp.raise_for_status()
         return resp.json()["choices"][0]["message"]["content"]
@@ -179,6 +179,51 @@ async def check_drug_interactions(drug_names: list[str]) -> dict:
         return json.loads(cleaned)
     except Exception:
         return {"summary": result, "interactions": [], "overall_safety": "unknown"}
+
+
+async def assess_symptoms(data: dict) -> dict:
+    prompt = f"""Pengguna menceritakan keluhan kesehatan berikut.
+Keluhan: {data.get('complaint', '')}
+Usia: {data.get('age') or 'tidak disebutkan'}
+Jenis kelamin: {data.get('sex') or 'tidak disebutkan'}
+Durasi: {data.get('duration') or 'tidak disebutkan'}
+Kondisi/penyakit lain: {data.get('existing_conditions') or 'tidak ada/tidak disebutkan'}
+Obat yang sedang digunakan: {data.get('current_medicines') or 'tidak ada/tidak disebutkan'}
+Alergi: {data.get('allergies') or 'tidak ada/tidak disebutkan'}
+Kehamilan/menyusui: {data.get('pregnancy_status') or 'tidak relevan/tidak disebutkan'}
+
+Lakukan triase konservatif. Jangan mendiagnosis, meresepkan, atau menyarankan antibiotik,
+obat keras, penghentian obat dokter, maupun dosis personal. Bila informasi penting kurang,
+nyatakan keterbatasannya. Opsi obat hanya boleh obat bebas untuk keluhan ringan, dengan
+peringatan kontraindikasi dan anjuran konfirmasi apoteker. Jika ada tanda bahaya, prioritaskan
+pertolongan medis dan jangan menunda dengan swamedikasi.
+
+Kembalikan JSON valid saja:
+{{"urgency":"emergency/urgent/routine/self_care", "assessment":"ringkasan non-diagnostik",
+"self_care":["langkah non-obat"], "otc_options":[{{"medicine":"nama generik/golongan",
+"purpose":"kegunaan", "directions":"ikuti label/aturan umum non-personal",
+"cautions":"kontraindikasi dan perhatian"}}], "red_flags":["tanda bahaya yang relevan"],
+"next_steps":["langkah berikutnya"], "disclaimer":"batasan singkat"}}"""
+    result = await chat_completion([
+        {"role": "system", "content": (
+            "Anda adalah asisten edukasi kesehatan dan farmasi Indonesia yang mengutamakan "
+            "keselamatan. Anda bukan dokter, tidak membuat diagnosis, dan selalu memberi JSON valid."
+        )},
+        {"role": "user", "content": prompt},
+    ])
+    import json
+    try:
+        cleaned = result.strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0]
+        return json.loads(cleaned)
+    except Exception:
+        return {
+            "urgency": "routine", "assessment": result, "self_care": [],
+            "otc_options": [], "red_flags": [],
+            "next_steps": ["Konfirmasikan keluhan kepada dokter atau apoteker."],
+            "disclaimer": "Hasil AI bukan diagnosis atau resep.",
+        }
 
 
 async def analyze_drug(drug_data: dict) -> dict:

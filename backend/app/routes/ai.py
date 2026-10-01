@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
-from ..ai_service import analyze_pill_image, ocr_prescription, check_drug_interactions, analyze_drug, generate_drug_visual
+from ..ai_service import analyze_pill_image, ocr_prescription, check_drug_interactions, analyze_drug, generate_drug_visual, assess_symptoms
 from ..database import get_db
 from ..models import Drug
 
@@ -19,6 +19,17 @@ class DrugAnalyzeRequest(BaseModel):
 class DrugVisualRequest(BaseModel):
     drug_id: int
     use_premium: bool = False
+
+
+class SymptomRequest(BaseModel):
+    complaint: str = Field(min_length=10, max_length=3000)
+    age: int | None = Field(default=None, ge=0, le=120)
+    sex: str | None = Field(default=None, max_length=30)
+    duration: str | None = Field(default=None, max_length=200)
+    existing_conditions: str | None = Field(default=None, max_length=1000)
+    current_medicines: str | None = Field(default=None, max_length=1000)
+    allergies: str | None = Field(default=None, max_length=500)
+    pregnancy_status: str | None = Field(default=None, max_length=100)
 
 
 @router.post("/scan-pill")
@@ -43,6 +54,14 @@ async def check_interactions(req: InteractionRequest):
         return {"error": "Minimal 2 obat untuk cek interaksi"}
     result = await check_drug_interactions(req.drug_names)
     return result
+
+
+@router.post("/symptom-assessment")
+async def symptom_assessment(req: SymptomRequest):
+    try:
+        return await assess_symptoms(req.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @router.post("/analyze-drug")

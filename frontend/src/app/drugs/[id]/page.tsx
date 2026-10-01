@@ -30,7 +30,7 @@ export default function DrugDetailPage() {
 
   return (
     <main className="drugs-shell">
-      <nav className="site-nav"><div className="nav-inner"><Link href="/" className="brand" aria-label="PharmAI beranda"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></Link><div className="nav-links"><Link href="/drugs" className="drugs-nav-active">Database Obat</Link><Link href="/interactions">Interaksi</Link><Link href="/ocr">Resep</Link></div><Link href="/scan" className="nav-action">Mulai scan <span aria-hidden="true">↗</span></Link></div></nav>
+      <nav className="site-nav"><div className="nav-inner"><Link href="/" className="brand" aria-label="PharmAI beranda"><span className="brand-mark">+</span><span>Pharm<span>AI</span></span></Link><div className="nav-links"><Link href="/drugs" className="drugs-nav-active">Database Obat</Link><Link href="/interactions">Interaksi</Link><Link href="/keluhan">Cerita Keluhan</Link><Link href="/ocr">Resep</Link></div><Link href="/scan" className="nav-action">Mulai scan <span aria-hidden="true">↗</span></Link></div></nav>
 
       <section className="drug-detail-page">
         <Link href="/drugs" className="detail-back">← Kembali ke database</Link>

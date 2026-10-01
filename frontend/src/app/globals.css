@@ -3615,6 +3615,59 @@ html[data-theme="dark"] input {
     background: #1f5547;
 }
 
+.symptom-shell { min-height: 100vh; background: #f5f7f1; }
+.symptom-page { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 70px 0 100px; }
+.symptom-heading { max-width: 760px; margin-bottom: 42px; }
+.symptom-heading h1 { margin: 10px 0 18px; color: var(--accent); font: 500 clamp(42px, 6vw, 72px)/.98 Georgia, serif; letter-spacing: -3px; }
+.symptom-heading h1 em { color: #88a62c; font-weight: 400; }
+.symptom-heading p { max-width: 650px; color: var(--muted); line-height: 1.7; }
+.symptom-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, .85fr); gap: 28px; align-items: start; }
+.symptom-form, .symptom-result { padding: 30px; background: white; border: 1px solid #d9e2d7; box-shadow: 0 18px 48px rgba(28, 64, 48, .07); }
+.symptom-form { display: grid; gap: 18px; }
+.symptom-form label { display: grid; gap: 8px; }
+.symptom-form label > span { color: #35584c; font: 700 11px Arial, sans-serif; letter-spacing: .7px; text-transform: uppercase; }
+.symptom-form input, .symptom-form textarea, .symptom-form select { width: 100%; padding: 13px 14px; color: var(--fg); background: #fafbf8; border: 1px solid #ccd9ce; border-radius: 2px; font: 15px/1.5 Georgia, serif; outline: none; }
+.symptom-form input:focus, .symptom-form textarea:focus, .symptom-form select:focus { border-color: #87a52d; box-shadow: 0 0 0 3px rgba(135, 165, 45, .12); }
+.symptom-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.symptom-consent { padding: 14px 16px; color: #617068; background: #f2f6ed; border-left: 3px solid #91aa3c; font-size: 12px; line-height: 1.55; }
+.symptom-consent p { margin: 4px 0 0; }
+.symptom-error { padding: 12px 14px; color: #8a2525; background: #fff0ee; border: 1px solid #efc5c0; }
+.symptom-submit { justify-content: center; width: 100%; border: 0; }
+.symptom-result { position: sticky; top: 24px; min-height: 440px; }
+.symptom-placeholder { display: grid; min-height: 370px; place-content: center; text-align: center; color: #809087; }
+.symptom-placeholder > span:first-child { margin: 0 auto 14px; color: #90aa36; font-size: 38px; }
+.symptom-placeholder h2 { margin: 0 0 8px; color: #29483d; font: 400 24px Georgia, serif; }
+.urgency-banner { display: grid; gap: 4px; margin: -30px -30px 28px; padding: 20px 24px; color: white; background: #526d32; }
+.urgency-emergency .urgency-banner { background: #9d2e2e; }
+.urgency-urgent .urgency-banner { background: #ad6b22; }
+.urgency-banner small { font: 700 9px Arial, sans-serif; letter-spacing: 1.4px; }
+.urgency-banner strong { font: 400 24px Georgia, serif; }
+.symptom-answer section { padding: 0 0 22px; margin: 0 0 22px; border-bottom: 1px solid #e3e9e1; }
+.symptom-answer h2 { margin: 0 0 10px; color: #23483b; font: 600 18px Georgia, serif; }
+.symptom-answer p, .symptom-answer li { color: #5d6d64; font-size: 14px; line-height: 1.65; }
+.symptom-answer ul { margin: 0; padding-left: 20px; }
+.red-flag-box { padding: 16px !important; background: #fff3ef; border: 1px solid #efcabe !important; }
+.red-flag-box h2, .red-flag-box li { color: #8a342b; }
+.otc-list { display: grid; gap: 10px; }
+.otc-list article { display: grid; gap: 5px; padding: 14px; background: #f6f8f2; border-left: 3px solid #8da83a; }
+.otc-list article p { margin: 0; }
+.otc-list article small { color: #456052; }
+.otc-list article em { color: #8a5a30; font-size: 12px; line-height: 1.5; }
+.symptom-disclaimer { margin: 0; padding: 14px; background: #eef3ea; font-size: 12px !important; }
+.symptom-nav-active { color: #87a52d !important; }
+
+@media (max-width: 900px) {
+    .symptom-layout { grid-template-columns: 1fr; }
+    .symptom-result { position: static; }
+}
+
+@media (max-width: 600px) {
+    .symptom-page { width: min(100% - 24px, 1180px); padding-top: 42px; }
+    .symptom-form, .symptom-result { padding: 20px; }
+    .symptom-fields { grid-template-columns: 1fr; }
+    .urgency-banner { margin: -20px -20px 22px; }
+}
+
 @media (max-width: 640px) {
     .pwa-install {
         left: 14px;

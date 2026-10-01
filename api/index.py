@@ -73,7 +73,7 @@ async def chat_completion(messages: list[dict], model: str | None = None) -> str
                 "HTTP-Referer": "https://pharm-ai-rouge.vercel.app",
                 "X-Title": "PharmAI",
             },
-            json={"model": selected_model, "messages": messages, "max_tokens": 1024},
+            json={"model": selected_model, "messages": messages, "max_tokens": 2048},
         )
         if not resp.is_success:
             try:
@@ -168,6 +168,17 @@ class InteractionRequest(BaseModel):
     drug_names: list[str]
 
 
+class SymptomRequest(BaseModel):
+    complaint: str
+    age: int | None = None
+    sex: str | None = None
+    duration: str | None = None
+    existing_conditions: str | None = None
+    current_medicines: str | None = None
+    allergies: str | None = None
+    pregnancy_status: str | None = None
+
+
 @app.post("/api/ai/interactions")
 async def check_interactions(req: InteractionRequest):
     if len(req.drug_names) < 2:
@@ -193,6 +204,33 @@ async def check_interactions(req: InteractionRequest):
         return parse_json_response(result)
     except Exception:
         return {"summary": result, "interactions": [], "overall_safety": "unknown"}
+
+
+@app.post("/api/ai/symptom-assessment")
+async def symptom_assessment(req: SymptomRequest):
+    prompt = f"""Keluhan: {req.complaint}
+Usia: {req.age or 'tidak disebutkan'}; Jenis kelamin: {req.sex or 'tidak disebutkan'};
+Durasi: {req.duration or 'tidak disebutkan'}; Kondisi lain: {req.existing_conditions or 'tidak disebutkan'};
+Obat saat ini: {req.current_medicines or 'tidak disebutkan'}; Alergi: {req.allergies or 'tidak disebutkan'};
+Kehamilan/menyusui: {req.pregnancy_status or 'tidak relevan/tidak disebutkan'}.
+
+Lakukan triase konservatif. Jangan mendiagnosis, meresepkan, menyarankan antibiotik/obat
+keras, menghentikan obat dokter, atau memberi dosis personal. Opsi obat hanya obat bebas
+untuk keluhan ringan, sertakan perhatian dan anjuran konfirmasi apoteker. Tanda bahaya harus
+mengutamakan pertolongan medis. Kembalikan JSON valid saja:
+{{"urgency":"emergency/urgent/routine/self_care","assessment":"ringkasan non-diagnostik",
+"self_care":["langkah"],"otc_options":[{{"medicine":"nama generik/golongan",
+"purpose":"kegunaan","directions":"ikuti label/aturan umum","cautions":"perhatian"}}],
+"red_flags":["tanda bahaya"],"next_steps":["langkah"],
+"disclaimer":"Hasil AI bukan diagnosis atau resep."}}"""
+    result = await chat_completion([
+        {"role": "system", "content": "Anda adalah asisten edukasi kesehatan dan farmasi Indonesia yang mengutamakan keselamatan. Selalu beri JSON valid."},
+        {"role": "user", "content": prompt},
+    ])
+    try:
+        return parse_json_response(result)
+    except Exception:
+        return {"urgency": "routine", "assessment": result, "self_care": [], "otc_options": [], "red_flags": [], "next_steps": ["Konsultasikan kepada dokter atau apoteker."], "disclaimer": "Hasil AI bukan diagnosis atau resep."}
 
 
 @app.get("/api/drugs")
