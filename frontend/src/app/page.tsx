@@ -13,7 +13,7 @@ export default function Home() {
         <div className="hero-copy">
           <div className="eyebrow"><span className="pulse-dot" /> Asisten kesehatan digital Anda</div>
           <h1>Kenali obat.<br /><em>Jaga kesehatan.</em></h1>
-          <p className="hero-description">PharmAI membantu Anda memahami obat, membaca resep, dan menemukan potensi interaksi dengan lebih cepat dan tenang.</p>
+          <p className="hero-description">PharmAI membantu Anda memahami obat, membaca resep, memeriksa interaksi, dan menentukan langkah aman dari keluhan kesehatan.</p>
           <div className="hero-actions"><a href="/scan" className="primary-action">Scan obat sekarang <span aria-hidden="true">→</span></a><a href="/drugs" className="text-action">Jelajahi database <span aria-hidden="true">↗</span></a></div>
           <div className="trust-line"><span className="trust-avatars"><i /><i /><i /></span> Dipakai untuk keputusan yang lebih aman</div>
         </div>
@@ -26,7 +26,7 @@ export default function Home() {
             <div className="result-bar"><span /></div>
           </div>
           <div className="floating-note note-top"><span className="note-icon">✓</span><div><strong>Aman digunakan</strong><small>Analisis selesai</small></div></div>
-          <div className="floating-note note-bottom"><span className="note-icon blue">⌁</span><div><strong>3 fitur pintar</strong><small>Dalam satu platform</small></div></div>
+          <div className="floating-note note-bottom"><span className="note-icon blue">⌁</span><div><strong>4 fitur pintar</strong><small>Dalam satu platform</small></div></div>
         </div>
       </section>
 
@@ -36,6 +36,7 @@ export default function Home() {
           <a href="/scan" className="feature-card feature-blue"><span className="feature-icon">⌕</span><span className="card-number">01</span><h3>Identifikasi obat</h3><p>Kenali berbagai bentuk sediaan obat dan kemasannya dengan analisis visual AI.</p><span className="card-arrow">↗</span></a>
           <a href="/interactions" className="feature-card feature-lime"><span className="feature-icon">◌</span><span className="card-number">02</span><h3>Cek interaksi</h3><p>Periksa kombinasi obat dan pahami hal penting sebelum dikonsumsi.</p><span className="card-arrow">↗</span></a>
           <a href="/ocr" className="feature-card feature-white"><span className="feature-icon">≡</span><span className="card-number">03</span><h3>Transkrip resep</h3><p>Ubah tulisan resep dokter menjadi informasi yang lebih mudah dibaca.</p><span className="card-arrow">↗</span></a>
+          <a href="/keluhan" className="feature-card feature-green"><span className="feature-icon">✦</span><span className="card-number">04</span><h3>Cerita keluhan</h3><p>Ceritakan gejala yang dirasakan untuk mendapatkan triase dan langkah awal yang lebih aman.</p><span className="card-arrow">↗</span></a>
         </div>
       </section>
 
